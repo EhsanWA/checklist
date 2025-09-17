@@ -8,8 +8,13 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
 Route::get('/', fn() => redirect()->route('reports.index'));
 Route::resource('reports', ReportController::class)->only(['index','create','store','show']);
 
+Route::get('/meetrapport', function () {
+    return view('meetrapport');
+});
 
+Route::get('/tabblad', function () {
+    return view('tabblad');
+});
