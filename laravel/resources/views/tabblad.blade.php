@@ -18,5 +18,13 @@
         <!-- Placeholder for dynamic content -->
         <p class="text-gray-500">Geen gegevens beschikbaar...</p>
     </main>
+    @include('components.sidebar')
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('translate-x-full');
+            sidebar.classList.toggle('translate-x-0');
+        }
+    </script>
 </body>
 </html>
