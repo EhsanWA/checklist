@@ -9,7 +9,7 @@ Route::get('/', function () {
 });
 
 Route::get('/', fn() => redirect()->route('reports.index'));
-Route::resource('reports', ReportController::class)->only(['index','create','store','show']);
+Route::resource('reports', ReportController::class); // nu ook edit, update, destroy
 
 Route::get('/meetrapport', function () {
     return view('meetrapport');
