@@ -35,4 +35,35 @@ class ReportController extends Controller
     {
         return view('reports.show', compact('report'));
     }
+
+    // app/Http/Controllers/ReportController.php
+
+    public function edit(Report $report)
+    {
+        return view('reports.edit', compact('report'));
+    }
+
+    public function update(Request $request, Report $report)
+    {
+        $data = $request->validate([
+            'title'       => ['required', 'string', 'max:120'],
+            'description' => ['nullable', 'string', 'max:5000'],
+            'status'      => ['required', 'in:draft,submitted,archived'],
+        ]);
+
+        $report->update($data);
+
+        return redirect()
+            ->route('reports.index')
+            ->with('success', 'Rapportage bijgewerkt.');
+    }
+
+    public function destroy(Report $report)
+    {
+        $report->delete();
+
+        return redirect()
+            ->route('reports.index')
+            ->with('success', 'Rapportage verwijderd.');
+    }
 }

@@ -1,10 +1,11 @@
+{{-- resources/views/reports/edit.blade.php --}}
 <!DOCTYPE html>
 <html lang="nl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nieuwe rapportage</title>
+    <title>{{ $report->title }} – Bewerken</title>
     @vite('resources/css/app.css')
 </head>
 
@@ -14,10 +15,10 @@
     </header>
 
     <div class="max-w-xl mx-auto bg-white rounded-lg shadow p-6 mt-10">
-        <h1 class="text-xl font-semibold mb-4">Nieuwe rapportage</h1>
-        {{-- resources/views/reports/create.blade.php --}}
-        <form method="POST" action="{{ route('reports.store') }}" class="space-y-4">
-            @include('reports._form')
+        <h1 class="text-xl font-semibold mb-4">Rapportage bewerken</h1>
+        <form method="POST" action="{{ route('reports.update', $report) }}" class="space-y-4">
+            @method('PUT')
+            @include('reports._form', ['report' => $report])
             <div class="flex gap-3 pt-6">
                 <a href="{{ route('reports.index') }}"
                     class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium transition">
@@ -29,7 +30,6 @@
                 </button>
             </div>
 
-        </form>
     </div>
 </body>
 
