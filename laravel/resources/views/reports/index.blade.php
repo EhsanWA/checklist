@@ -10,7 +10,7 @@
 
 <body class="bg-gray-100 flex flex-col min-h-screen">
 
-    @include('components.header')
+    @include('header')
 
     <main class="flex-grow flex flex-col items-center justify-start bg-blue-100 py-8">
         <div class="bg-white shadow-md rounded-lg w-full max-w-5xl">

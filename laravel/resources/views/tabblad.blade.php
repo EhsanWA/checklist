@@ -9,16 +9,16 @@
 </head>
 <body class="bg-white text-gray-800">
     <!-- Header -->
-    @include('components.header')
+    @include('header')
 
     <!-- Tabs -->
-    @include('components.tabNav')
+    @include('tabNav')
 
     <main class="p-4">
         <!-- Placeholder for dynamic content -->
         <p class="text-gray-500">Geen gegevens beschikbaar...</p>
     </main>
-    @include('components.sidebar')
+    @include('sidebar')
     <script>
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');

@@ -69,10 +69,18 @@ class ReportController extends Controller
             ->with('success', 'Rapportage aangemaakt: ' . $report->title);
     }
 
+    // ReportsController.php
     public function show(Report $report)
     {
-        return view('reports.show', compact('report'));
+        // Filter op hetzelfde team (pas kolomnamen aan naar jouw model)
+        $reports = Report::query()
+            ->select('id', 'title', 'created_at', 'status')
+            ->latest()
+            ->get();
+
+        return view('reports.show', compact('report', 'reports'));
     }
+
 
     // app/Http/Controllers/ReportController.php
 
