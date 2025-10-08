@@ -7,15 +7,14 @@ use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
-    // app/Http/Controllers/ReportController.php
     public function index(Request $request)
     {
-        $status   = $request->string('status', 'all')->toString(); // all|draft|submitted|archived
-        $q        = $request->string('q')->toString();
-        $sort     = $request->string('sort', 'created_desc')->toString(); // created_desc|created_asc|title_asc|title_desc
-        $perPage  = (int) $request->integer('per_page', 12);
+        $status  = $request->string('status', 'all')->toString();   // all|draft|submitted|archived
+        $q       = $request->string('q')->toString();
+        $sort    = $request->string('sort', 'created_desc')->toString(); // created_desc|created_asc|schip_naam_asc|...
+        $perPage = (int) $request->integer('per_page', 12);
 
-        // Tab tellers
+        // Tellers voor tabs
         $counts = [
             'all'       => Report::count(),
             'draft'     => Report::where('status', 'draft')->count(),
@@ -30,26 +29,53 @@ class ReportController extends Controller
         }
 
         if ($q) {
-            $query->where(
-                fn($qq) =>
-                $qq->where('title', 'like', "%{$q}%")
-                    ->orWhere('description', 'like', "%{$q}%")
-            );
+            $query->where(function ($qq) use ($q) {
+                $qq->where('schip_naam', 'like', "%{$q}%")
+                    ->orWhere('schip_nummer', 'like', "%{$q}%")
+                    ->orWhere('monteur', 'like', "%{$q}%")
+                    ->orWhere('description', 'like', "%{$q}%");
+            });
         }
 
-        // Sorteren
-        match ($sort) {
-            'created_asc' => $query->orderBy('created_at', 'asc'),
-            'title_asc'   => $query->orderBy('title', 'asc'),
-            'title_desc'  => $query->orderBy('title', 'desc'),
-            default       => $query->orderBy('created_at', 'desc'), // created_desc
-        };
+        // Sorteren (incl. aliasen voor backward-compat met oude 'title_*')
+        switch ($sort) {
+            case 'created_asc':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'schip_naam_asc':
+            case 'title_asc':
+                $query->orderBy('schip_naam', 'asc');
+                break;
+            case 'schip_naam_desc':
+            case 'title_desc':
+                $query->orderBy('schip_naam', 'desc');
+                break;
+            case 'bouwjaar_asc':
+                $query->orderBy('schip_bouwjaar', 'asc');
+                break;
+            case 'bouwjaar_desc':
+                $query->orderBy('schip_bouwjaar', 'desc');
+                break;
+            case 'nummer_asc':
+                $query->orderBy('schip_nummer', 'asc');
+                break;
+            case 'nummer_desc':
+                $query->orderBy('schip_nummer', 'desc');
+                break;
+            case 'monteur_asc':
+                $query->orderBy('monteur', 'asc');
+                break;
+            case 'monteur_desc':
+                $query->orderBy('monteur', 'desc');
+                break;
+            default:
+                $query->orderBy('created_at', 'desc'); // created_desc
+        }
 
         $reports = $query->paginate($perPage)->appends($request->query());
 
         return view('reports.index', compact('reports', 'counts', 'status', 'q', 'sort', 'perPage'));
     }
-
 
     public function create()
     {
@@ -59,30 +85,27 @@ class ReportController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'title'       => ['required', 'string', 'max:120'],
-            'description' => ['nullable', 'string', 'max:5000'],
+            'schip_naam'     => ['required', 'string', 'max:120'],
+            'schip_nummer'   => ['nullable', 'string', 'max:50'],
+            'schip_bouwjaar' => ['nullable', 'integer', 'min:1800', 'max:' . (date('Y') + 1)],
+            'monteur'        => ['required', 'string', 'max:120'],
+            'description'    => ['nullable', 'string', 'max:5000'],
+            'status'         => ['required', 'in:draft,submitted,archived'],
         ]);
 
-        $report = Report::create($data);
-        return redirect()
-            ->route('reports.index')
-            ->with('success', 'Rapportage aangemaakt: ' . $report->title);
+        Report::create($data);
+
+        return redirect()->route('reports.index')
+            ->with('success', 'Rapportage aangemaakt.');
     }
 
-    // ReportsController.php
     public function show(Report $report)
     {
-        // Filter op hetzelfde team (pas kolomnamen aan naar jouw model)
-        $reports = Report::query()
-            ->select('id', 'title', 'created_at', 'status')
-            ->latest()
-            ->get();
+        // (optioneel) lijstje voor zijbalk/overzicht
+        $reports = Report::select('id', 'schip_naam', 'created_at', 'status')->latest()->get();
 
         return view('reports.show', compact('report', 'reports'));
     }
-
-
-    // app/Http/Controllers/ReportController.php
 
     public function edit(Report $report)
     {
@@ -92,15 +115,17 @@ class ReportController extends Controller
     public function update(Request $request, Report $report)
     {
         $data = $request->validate([
-            'title'       => ['required', 'string', 'max:120'],
-            'description' => ['nullable', 'string', 'max:5000'],
-            'status'      => ['required', 'in:draft,submitted,archived'],
+            'schip_naam'     => ['required', 'string', 'max:120'],
+            'schip_nummer'   => ['nullable', 'string', 'max:50'],
+            'schip_bouwjaar' => ['nullable', 'integer', 'min:1800', 'max:' . (date('Y') + 1)],
+            'monteur'        => ['required', 'string', 'max:120'],
+            'description'    => ['nullable', 'string', 'max:5000'],
+            'status'         => ['required', 'in:draft,submitted,archived'],
         ]);
 
         $report->update($data);
 
-        return redirect()
-            ->route('reports.index')
+        return redirect()->route('reports.index')
             ->with('success', 'Rapportage bijgewerkt.');
     }
 
@@ -108,8 +133,7 @@ class ReportController extends Controller
     {
         $report->delete();
 
-        return redirect()
-            ->route('reports.index')
+        return redirect()->route('reports.index')
             ->with('success', 'Rapportage verwijderd.');
     }
 }
