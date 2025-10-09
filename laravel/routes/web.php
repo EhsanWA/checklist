@@ -5,15 +5,12 @@ use App\Http\Controllers\ReportController;
 
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
 });
 
-Route::get('/', fn() => redirect()->route('reports.index'));
+// Route::get('/', fn() => redirect()->route('home'));
 Route::resource('reports', ReportController::class); // nu ook edit, update, destroy
 
-Route::get('/meetrapport', function () {
-    return view('meetrapport');
-});
 
 Route::get('/tabblad', function () {
     return view('tabblad');

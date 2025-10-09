@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="nl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://kit.fontawesome.com/21e98e6012.js" crossorigin="anonymous"></script>
 </head>
+
 <body class="bg-white text-gray-800">
     <!-- Header -->
     @include('header')
@@ -24,6 +26,8 @@
         </div>
         <div id="tab3-content" class="tab-content hidden"></div>
     </main>
+
+    <!-- Sidebar -->
     @include('sidebar')
 
 </body>
