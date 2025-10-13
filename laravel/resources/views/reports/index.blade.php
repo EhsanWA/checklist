@@ -4,189 +4,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports</title>
+    <title>Koninklijke Marine – Rapportages</title>
     @vite('resources/css/app.css')
 </head>
 
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-gray-100 flex flex-col min-h-screen">
 
     {{-- Header --}}
     @include('header')
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <main class="flex-grow flex flex-col items-center justify-start bg-blue-100 py-8">
+        <div class="bg-white shadow-md rounded-lg w-full max-w-6xl">
 
-        <header class="flex items-start justify-between gap-4">
-            <div>
-                <h1 class="text-3xl font-semibold tracking-tight">Rapportages</h1>
-                <p class="text-gray-600">Iedereen kan rapportages bekijken en openen.</p>
+            {{-- Pagina-header --}}
+            <div class="px-6 pt-6 text-center">
+                @if (session('success'))
+                    <div class="mb-4 rounded bg-green-100 text-green-800 px-3 py-2 text-sm">
+                        {{ session('success') }}
+                    </div>
+                @endif
+                <h2 class="text-2xl font-bold">Rapportages</h2>
+                <p class="text-gray-600 mb-4">Zoek, filter en open een rapportage.</p>
             </div>
-        </header>
 
-        {{-- Filters op jouw velden --}}
-        <form method="GET" action="{{ route('reports.index') }}" class="bg-white rounded-2xl shadow p-5">
-            <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+            {{-- Tabs --}}
+            @php
+                $tabs = [
+                    'all' => ['label' => 'Alles', 'count' => $counts['all']],
+                    'draft' => ['label' => 'Concepten', 'count' => $counts['draft']],
+                    'submitted' => ['label' => 'Ingediend', 'count' => $counts['submitted']],
+                    'archived' => ['label' => 'Archief', 'count' => $counts['archived']],
+                ];
+            @endphp
 
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Schip naam</label>
-                    <input type="text" name="schip_naam" value="{{ request('schip_naam') }}"
-                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-200 px-3 py-2"
-                        placeholder="Bijv. Zr.Ms. ...">
+            <div class="px-4 sm:px-6">
+                <div class="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2">
+                    @foreach ($tabs as $key => $tab)
+                        <a href="{{ route('reports.index', array_merge(request()->except('page'), ['status' => $key])) }}"
+                            class="whitespace-nowrap px-3 py-2 rounded-lg text-sm border
+                                {{ $status === $key ? 'bg-sky-500 text-white border-sky-500' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
+                            {{ $tab['label'] }}
+                            <span
+                                class="ml-2 inline-block text-xs px-2 py-0.5 rounded-full
+                                {{ $status === $key ? 'bg-white text-sky-700' : 'bg-gray-200 text-gray-700' }}">
+                                {{ $tab['count'] }}
+                            </span>
+                        </a>
+                    @endforeach
                 </div>
+            </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Schip nummer</label>
-                    <input type="text" name="schip_nummer" value="{{ request('schip_nummer') }}"
-                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-200 px-3 py-2"
-                        placeholder="Bijv. M847">
-                </div>
+            {{-- Toolbar: zoeken + sorteren + per pagina + nieuwe --}}
+            <form method="GET" action="{{ route('reports.index') }}" class="px-4 sm:px-6 mt-4">
+                <input type="hidden" name="status" value="{{ $status }}">
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Bouwjaar</label>
-                    <input type="number" name="schip_bouwjaar" value="{{ request('schip_bouwjaar') }}" min="1800"
-                        max="{{ now()->year + 1 }}"
-                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-200 px-3 py-2"
-                        placeholder="{{ now()->year }}">
-                </div>
+                <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Monteur</label>
-                    <input type="text" name="monteur" value="{{ request('monteur') }}"
-                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-200 px-3 py-2"
-                        placeholder="Naam monteur">
-                </div>
+                    <input name="q" value="{{ $q }}" placeholder="Zoek op schip, nummer of monteur..."
+                        class="flex-1 rounded-lg border-gray-300 shadow-sm focus:ring focus:ring-sky-200 focus:border-sky-500 px-4 py-2">
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select name="status"
-                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-200 px-3 py-2">
-                        @php $s = request('status', ''); @endphp
-                        <option value="" {{ $s === '' ? 'selected' : '' }}>Alles</option>
-                        <option value="draft" {{ $s === 'draft' ? 'selected' : '' }}>Concept</option>
-                        <option value="submitted" {{ $s === 'submitted' ? 'selected' : '' }}>Ingediend</option>
-                        <option value="archived" {{ $s === 'archived' ? 'selected' : '' }}>Archief</option>
+                    <select name="sort"
+                        class="rounded-lg border-gray-300 shadow-sm focus:ring focus:ring-sky-200 focus:border-sky-500 px-3 py-2">
+                        <option value="created_desc" @selected($sort === 'created_desc')>Nieuwste eerst</option>
+                        <option value="created_asc" @selected($sort === 'created_asc')>Oudste eerst</option>
+                        <option value="schip_naam_asc" @selected($sort === 'schip_naam_asc')>Schip A–Z</option>
+                        <option value="schip_naam_desc" @selected($sort === 'schip_naam_desc')>Schip Z–A</option>
+                        <option value="bouwjaar_desc" @selected($sort === 'bouwjaar_desc')>Nieuwste bouwjaar</option>
+                        <option value="bouwjaar_asc" @selected($sort === 'bouwjaar_asc')>Oudste bouwjaar</option>
                     </select>
+
+                    <select name="per_page"
+                        class="rounded-lg border-gray-300 shadow-sm focus:ring focus:ring-sky-200 focus:border-sky-500 px-3 py-2">
+                        @foreach ([6, 12, 18, 24, 36] as $n)
+                            <option value="{{ $n }}" @selected($perPage == $n)>{{ $n }}/pagina
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <button
+                        class="rounded-lg bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 font-medium">Toepassen</button>
+
+                    <a href="{{ route('reports.create') }}"
+                        class="rounded-lg bg-green-500 hover:bg-green-600 text-white px-4 py-2 font-semibold text-center">
+                        + Nieuwe
+                    </a>
                 </div>
+            </form>
 
-                <div class="md:col-span-3">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Beschrijving bevat</label>
-                    <input type="text" name="description" value="{{ request('description') }}"
-                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-200 px-3 py-2"
-                        placeholder="Zoekterm in beschrijving">
-                </div>
-
-                <div class="md:col-span-3 grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Vanaf (aangemaakt)</label>
-                        <input type="date" name="from" value="{{ request('from') }}"
-                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-200 px-3 py-2">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tot (aangemaakt)</label>
-                        <input type="date" name="to" value="{{ request('to') }}"
-                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-200 px-3 py-2">
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-5 flex items-center gap-2">
-                <button type="submit"
-                    class="inline-flex items-center rounded-lg bg-sky-600 text-white px-4 py-2 font-medium shadow hover:bg-sky-700 transition">
-                    Filters toepassen
-                </button>
-                <a href="{{ route('reports.index') }}"
-                    class="inline-flex items-center rounded-lg bg-gray-100 text-gray-800 px-4 py-2 font-medium hover:bg-gray-200 transition">
-                    Reset
-                </a>
-            </div>
-        </form>
-
-        {{-- Lijst --}}
-        <section class="bg-white rounded-2xl shadow">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Schip</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nummer</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Bouwjaar</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Monteur</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Aangemaakt
-                            </th>
-                            <th class="px-6 py-3"></th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-100">
-                        @forelse($reports as $report)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div class="font-medium">
-                                        <a href="{{ route('reports.show', $report) }}" class="hover:underline">
-                                            {{ $report->schip_naam ?? '—' }}
-                                        </a>
+            {{-- Grid met rapportages --}}
+            <div class="px-4 sm:px-6 py-6">
+                @if ($reports->count())
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        @foreach ($reports as $report)
+                            <div class="rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow transition">
+                                <a href="{{ route('reports.show', $report) }}" class="block p-4">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <h3 class="font-semibold text-gray-900 line-clamp-2">
+                                            {{ $report->schip_naam ?? 'Onbekend schip' }}
+                                        </h3>
+                                        <span
+                                            class="text-xs px-2 py-0.5 rounded-full
+                                                @class([
+                                                    'bg-gray-200 text-gray-700' => $report->status === 'draft',
+                                                    'bg-green-100 text-green-700' => $report->status === 'submitted',
+                                                    'bg-gray-300 text-gray-800' => $report->status === 'archived',
+                                                ])">
+                                            {{ ucfirst($report->status) }}
+                                        </span>
                                     </div>
-                                    @if (!empty($report->description))
-                                        <div class="text-gray-500 text-sm line-clamp-2">
-                                            {{ \Illuminate\Support\Str::limit($report->description, 120) }}
-                                        </div>
+
+                                    {{-- Subinfo --}}
+                                    <div class="mt-2 text-sm text-gray-700 space-y-1">
+                                        @if ($report->schip_nummer)
+                                            <p><span class="font-medium">Nummer:</span> {{ $report->schip_nummer }}</p>
+                                        @endif
+                                        @if ($report->schip_bouwjaar)
+                                            <p><span class="font-medium">Bouwjaar:</span> {{ $report->schip_bouwjaar }}
+                                            </p>
+                                        @endif
+                                        @if ($report->monteur)
+                                            <p><span class="font-medium">Monteur:</span> {{ $report->monteur }}</p>
+                                        @endif
+                                    </div>
+
+                                    {{-- Beschrijving (max 3 regels) --}}
+                                    @if ($report->description)
+                                        <p class="mt-3 text-sm text-gray-600 line-clamp-3">
+                                            {{ $report->description }}
+                                        </p>
                                     @endif
-                                </td>
-                                <td class="px-6 py-4 text-gray-700">
-                                    {{ $report->schip_nummer ?? '—' }}
-                                </td>
-                                <td class="px-6 py-4 text-gray-700">
-                                    {{ $report->schip_bouwjaar ?? '—' }}
-                                </td>
-                                <td class="px-6 py-4 text-gray-700">
-                                    {{ $report->monteur ?? '—' }}
-                                </td>
-                                <td class="px-6 py-4">
-                                    @php
-                                        $status = $report->status ?? '';
-                                        $badge = match ($status) {
-                                            'draft' => 'bg-yellow-50 text-yellow-800 ring-yellow-600/20',
-                                            'submitted' => 'bg-sky-50 text-sky-800 ring-sky-600/20',
-                                            'archived' => 'bg-gray-100 text-gray-800 ring-gray-500/20',
-                                            default => 'bg-gray-50 text-gray-700 ring-gray-600/10',
-                                        };
-                                        $label =
-                                            [
-                                                'draft' => 'Concept',
-                                                'submitted' => 'Ingediend',
-                                                'archived' => 'Archief',
-                                            ][$status] ?? ucfirst($status ?: '—');
-                                    @endphp
-                                    <span
-                                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 {{ $badge }}">
-                                        {{ $label }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-gray-700">
-                                    {{ optional($report->created_at)->format('d-m-Y H:i') ?? '—' }}
-                                </td>
-                                <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('reports.show', $report) }}"
-                                        class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100">
-                                        Bekijken
+
+                                    <p class="mt-3 text-xs text-gray-500">
+                                        Aangemaakt op {{ $report->created_at->format('d-m-Y H:i') }}
+                                    </p>
+                                </a>
+
+                                {{-- Actieknoppen --}}
+                                <div class="flex gap-2 p-3 border-t border-gray-100">
+                                    <a href="{{ route('reports.edit', $report) }}"
+                                        class="flex-1 text-center rounded bg-blue-600 hover:bg-blue-700 text-white text-sm py-1.5">
+                                        Bewerken
                                     </a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="px-6 py-12 text-center">
-                                    <div class="text-gray-500">Geen rapportages gevonden met deze filters.</div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                                    <form method="POST" action="{{ route('reports.destroy', $report) }}"
+                                        class="flex-1"
+                                        onsubmit="return confirm('‘{{ $report->schip_naam }}’ verwijderen?');">
+                                        @csrf @method('DELETE')
+                                        <button
+                                            class="w-full text-center rounded bg-red-600 hover:bg-red-700 text-white text-sm py-1.5">
+                                            Verwijderen
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
 
-            <div class="px-4 py-3 border-t border-gray-100">
-                {{ $reports->links() }}
+                    <div class="mt-6 px-2">
+                        {{ $reports->onEachSide(1)->links() }}
+                    </div>
+                @else
+                    <div class="text-center text-gray-500 py-16">
+                        Geen rapportages gevonden. Pas je filters of zoekopdracht aan.
+                    </div>
+                @endif
             </div>
-        </section>
-
+        </div>
     </main>
 </body>
 

@@ -7,45 +7,7 @@ use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
-    /**
-     * Publiek overzicht (zonder auth), met filters op jouw velden.
-     */
     public function index(Request $request)
-    {
-        $reports = Report::query()
-            ->when($request->filled('schip_naam'), fn($q) =>
-            $q->where('schip_naam', 'like', '%' . $request->schip_naam . '%'))
-            ->when($request->filled('schip_nummer'), fn($q) =>
-            $q->where('schip_nummer', 'like', '%' . $request->schip_nummer . '%'))
-            ->when($request->filled('schip_bouwjaar'), fn($q) =>
-            $q->where('schip_bouwjaar', $request->schip_bouwjaar))
-            ->when($request->filled('monteur'), fn($q) =>
-            $q->where('monteur', 'like', '%' . $request->monteur . '%'))
-            ->when($request->filled('description'), fn($q) =>
-            $q->where('description', 'like', '%' . $request->description . '%'))
-            ->when($request->filled('status'), fn($q) =>
-            $q->where('status', $request->status))
-            // optioneel: aangemaakt tussen
-            ->when($request->filled('from'), fn($q) =>
-            $q->whereDate('created_at', '>=', $request->from))
-            ->when($request->filled('to'), fn($q) =>
-            $q->whereDate('created_at', '<=', $request->to))
-            ->orderByDesc('created_at')
-            ->paginate((int) $request->integer('per_page', 12))
-            ->withQueryString();
-
-        return view('reports.index', [
-            'reports' => $reports,
-            'search'  => null, // niet meer in gebruik
-            'from'    => $request->get('from'),
-            'to'      => $request->get('to'),
-        ]);
-    }
-
-    /**
-     * Beheer-overzicht met tab-tellers en sorting.
-     */
-    public function beheer(Request $request)
     {
         $status  = $request->string('status', 'all')->toString();   // all|draft|submitted|archived
         $q       = $request->string('q')->toString();
@@ -75,7 +37,7 @@ class ReportController extends Controller
             });
         }
 
-        // Sorteren (incl. aliasen voor oude 'title_*')
+        // Sorteren (incl. aliasen voor backward-compat met oude 'title_*')
         switch ($sort) {
             case 'created_asc':
                 $query->orderBy('created_at', 'asc');
@@ -112,7 +74,7 @@ class ReportController extends Controller
 
         $reports = $query->paginate($perPage)->appends($request->query());
 
-        return view('reports.beheer', compact('reports', 'counts', 'status', 'q', 'sort', 'perPage'));
+        return view('reports.index', compact('reports', 'counts', 'status', 'q', 'sort', 'perPage'));
     }
 
     public function create()
@@ -133,7 +95,7 @@ class ReportController extends Controller
 
         Report::create($data);
 
-        return redirect()->route('reports.beheer')
+        return redirect()->route('reports.index')
             ->with('success', 'Rapportage aangemaakt.');
     }
 
@@ -163,7 +125,7 @@ class ReportController extends Controller
 
         $report->update($data);
 
-        return redirect()->route('reports.beheer')
+        return redirect()->route('reports.index')
             ->with('success', 'Rapportage bijgewerkt.');
     }
 
@@ -171,7 +133,7 @@ class ReportController extends Controller
     {
         $report->delete();
 
-        return redirect()->route('reports.beheer')
+        return redirect()->route('reports.index')
             ->with('success', 'Rapportage verwijderd.');
     }
 }
