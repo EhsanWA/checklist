@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdminPinController;
 
+// Home
 Route::view('/', 'home');
 
 // Admin PIN login/logout
@@ -11,16 +12,16 @@ Route::get('/admin/login',  [AdminPinController::class, 'show'])->name('admin.lo
 Route::post('/admin/login', [AdminPinController::class, 'verify'])->name('admin.login.verify');
 Route::post('/admin/logout', [AdminPinController::class, 'logout'])->name('admin.logout');
 
-// Beheer — achter PIN-middleware
+// Beheer — beveiligd met PIN
 Route::get('/reports/beheer', [ReportController::class, 'beheer'])
     ->middleware('admin.pin')
     ->name('reports.beheer');
 
-// (optioneel) oude pad redirecten
+// Redirect /beheer → juiste URL
 Route::redirect('/beheer', '/reports/beheer');
 
-// Publiek overzicht (index) via controller
+// Publiek overzicht
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
-// Resource routes voor CRUD (index staat hierboven al)
+// Resource voor CRUD
 Route::resource('reports', ReportController::class)->except(['index']);

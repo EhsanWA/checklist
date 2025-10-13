@@ -1,104 +1,231 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>home</title>
+    <title>Report Manager</title>
     @vite('resources/css/app.css')
+    {{-- Font Awesome voor icoontjes --}}
+    <script src="https://kit.fontawesome.com/a2e0a4c3c1.js" crossorigin="anonymous"></script>
 </head>
 
-<body class="bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950">
-    {{-- Header --}}
+<body class="bg-gray-50 text-gray-900">
+
     @include('header')
 
-    <main>
-        <section class="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
-            <header class="mb-8 sm:mb-10">
-                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                    Welkom bij de Report Manager
-                </h1>
-                <p class="mt-2 text-slate-600 dark:text-slate-300">
-                    Kies een optie. <span class="font-medium">Rapportage invullen</span> is voor iedereen.
-                    <span class="font-medium">Beheer</span> is alleen voor geautoriseerde beheerders.
-                </p>
-            </header>
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
 
-            {{-- Twee hoofdkaarten: mobiel = 1 kolom, tablet/desktop = 2 kolommen --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {{-- Rapportage invullen --}}
-                {{-- TODO: vervang href="#" later met jouw route/url naar het formulier --}}
-                <a href="{{ route('reports.index') }}" role="button" aria-label="Open het rapportageformulier"
-                    class="group block rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 backdrop-blur p-6 sm:p-8 shadow-sm hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-sky-500">
-                    <div class="flex items-start gap-4">
-                        <span
-                            class="inline-flex h-12 w-12 items-center justify-center rounded-xl ring-1 ring-inset ring-slate-200 dark:ring-slate-700 bg-white dark:bg-slate-800 group-hover:scale-105 transition">
-                            {{-- icoon: formulier --}}
-                            <svg viewBox="0 0 24 24" class="h-6 w-6 text-sky-600 dark:text-sky-400" fill="currentColor"
-                                aria-hidden="true">
-                                <path
-                                    d="M9 2a1 1 0 0 0-1 1v1H6.5A2.5 2.5 0 0 0 4 6v12a2.5 2.5 0 0 0 2.5 2.5h11A2.5 2.5 0 0 0 20 18V6a2.5 2.5 0 0 0-2.5-2.5H16V3a1 1 0 0 0-1-1H9Zm1 2h4v1h-4V4Z" />
-                            </svg>
-                        </span>
-                        <div>
-                            <h2 class="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-100">
-                                Rapportage invullen
-                            </h2>
-                            <p class="mt-1 text-slate-600 dark:text-slate-300">
-                                Start direct met het invullen van een nieuwe rapportage of melding.
-                            </p>
-                            <div
-                                class="mt-5 inline-flex items-center gap-2 text-sm font-medium text-sky-700 dark:text-sky-300">
+        {{-- Hero --}}
+        <section class="text-center">
+            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-gray-900">
+                Welkom bij de Report Manager
+            </h1>
+            <p class="mt-3 text-lg text-gray-500">
+                Kies een optie. <span class="font-medium text-gray-700">Rapportage invullen</span> is voor iedereen.
+                <span class="font-medium text-gray-700">Beheer</span> is afgeschermd met een beheercode (PIN).
+            </p>
+        </section>
+
+        {{-- Primaire kaarten --}}
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 max-w-5xl mx-auto">
+
+            {{-- Rapportage invullen --}}
+            <article
+                class="bg-white rounded-3xl shadow-sm border border-gray-200/70 p-6 sm:p-8 hover:shadow-md transition">
+                <div class="flex items-start gap-4">
+                    <div class="shrink-0">
+                        <div
+                            class="h-12 w-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center ring-1 ring-sky-100">
+                            <i class="fa-solid fa-clipboard text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-2xl font-semibold text-gray-900">Rapportage invullen</h2>
+                        <p class="mt-1.5 text-gray-500">
+                            Start direct met het invullen van een nieuwe rapportage of melding.
+                        </p>
+
+                        <div class="mt-5">
+                            <a href="{{ route('reports.create') }}"
+                                class="inline-flex items-center gap-2 font-medium text-sky-700 hover:text-sky-900">
                                 Ga naar formulier
-                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd"
-                                        d="M10.293 3.293a1 1 0 011.414 0l5 5a1 1 0 01-1.414 1.414L12 6.414V16a1 1 0 11-2 0V6.414L5.707 9.707A1 1 0 114.293 8.293l5-5z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-sm"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            {{-- Beheer --}}
+            <article
+                class="bg-white rounded-3xl shadow-sm border border-gray-200/70 p-6 sm:p-8 hover:shadow-md transition">
+                <div class="flex items-start gap-4">
+                    <div class="shrink-0">
+                        <div
+                            class="h-12 w-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center ring-1 ring-amber-100">
+                            <i class="fa-solid fa-shield-halved text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-2xl font-semibold text-gray-900">Beheerder</h2>
+                        <p class="mt-1.5 text-gray-500">
+                            Log in om rapportages te beheren (aanmaken, bewerken, verwijderen).
+                        </p>
+
+                        <div class="mt-5">
+                            @if (session('is_admin') === true)
+                                <a href="{{ route('reports.beheer') }}"
+                                    class="inline-flex items-center gap-2 font-medium text-sky-700 hover:text-sky-900">
+                                    Naar beheer
+                                    <i class="fa-solid fa-chevron-right text-sm"></i>
+                                </a>
+                            @else
+                                <a href="{{ route('admin.login') }}"
+                                    class="inline-flex items-center gap-2 font-medium text-sky-700 hover:text-sky-900">
+                                    Naar beheer (PIN)
+                                    <i class="fa-solid fa-lock text-sm"></i>
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+        </section>
+
+        {{-- Snelkoppelingen / Documentatie / Overig --}}
+        <section class="space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-semibold">Snelkoppelingen</h3>
+                {{-- optioneel badge of versie --}}
+                {{-- <span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600 ring-1 ring-gray-200">v1.0</span> --}}
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                {{-- Documentatie --}}
+                <a href="{{ url('#') }}" {{-- vervang later door echte docs-URL of route --}}
+                    class="group bg-white rounded-2xl shadow-sm border border-gray-200/70 p-6 hover:shadow-md transition">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="h-11 w-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center ring-1 ring-indigo-100">
+                            <i class="fa-solid fa-book-open"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-700">Documentatie
+                            </h4>
+                            <p class="mt-1 text-gray-500 text-sm">Uitleg over velden, workflows en best practices.</p>
+                            <span class="mt-3 inline-flex items-center gap-1 text-indigo-700 text-sm font-medium">
+                                Open documentatie <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </span>
                         </div>
                     </div>
                 </a>
 
-                {{-- Beheerder (login) --}}
-                {{-- TODO: vervang href="#" later met jouw route/url naar de beheer-login --}}
-                <a href="{{ route('reports.beheer') }}" role="button" aria-label="Ga naar beheer login"
-                    class="group block rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 backdrop-blur p-6 sm:p-8 shadow-sm hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-amber-500">
+                {{-- Handleidingen --}}
+                <a href="{{ url('#') }}"
+                    class="group bg-white rounded-2xl shadow-sm border border-gray-200/70 p-6 hover:shadow-md transition">
                     <div class="flex items-start gap-4">
-                        <span
-                            class="inline-flex h-12 w-12 items-center justify-center rounded-xl ring-1 ring-inset ring-slate-200 dark:ring-slate-700 bg-white dark:bg-slate-800 group-hover:scale-105 transition">
-                            {{-- icoon: schild/slot --}}
-                            <svg viewBox="0 0 24 24" class="h-6 w-6 text-amber-600 dark:text-amber-400"
-                                fill="currentColor" aria-hidden="true">
-                                <path
-                                    d="M12 2 4 5v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V5l-8-3Zm0 19c-2.61-.93-6-5.06-6-10V6.3l6-2.25 6 2.25V11c0 4.94-3.39 9.07-6 10Z" />
-                                <path
-                                    d="M12 8a3 3 0 0 0-3 3v1a1 1 0 0 0-1 1v3h8v-3a1 1 0 0 0-1-1v-1a3 3 0 0 0-3-3Zm-1 4v-1a1 1 0 1 1 2 0v1h-2Z" />
-                            </svg>
-                        </span>
-                        <div>
-                            <h2 class="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-100">
-                                Beheerder
-                            </h2>
-                            <p class="mt-1 text-slate-600 dark:text-slate-300">
-                                Log in om rapportages te beheren (aanmaken, bewerken, verwijderen).
-                            </p>
-                            <div
-                                class="mt-5 inline-flex items-center gap-2 text-sm font-medium text-amber-700 dark:text-amber-300">
-                                Naar beheer
-                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd"
-                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
+                        <div
+                            class="h-11 w-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center ring-1 ring-emerald-100">
+                            <i class="fa-solid fa-chalkboard-user"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-semibold text-gray-900 group-hover:text-emerald-700">Handleidingen
+                            </h4>
+                            <p class="mt-1 text-gray-500 text-sm">Stap-voor-stap guides voor monteurs en beheerders.</p>
+                            <span class="mt-3 inline-flex items-center gap-1 text-emerald-700 text-sm font-medium">
+                                Bekijk handleidingen <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </span>
                         </div>
                     </div>
                 </a>
+
+                {{-- FAQ --}}
+                <a href="{{ url('#') }}"
+                    class="group bg-white rounded-2xl shadow-sm border border-gray-200/70 p-6 hover:shadow-md transition">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="h-11 w-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center ring-1 ring-amber-100">
+                            <i class="fa-solid fa-circle-question"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-semibold text-gray-900 group-hover:text-amber-700">Veelgestelde
+                                vragen</h4>
+                            <p class="mt-1 text-gray-500 text-sm">Snel antwoord op de meest voorkomende vragen.</p>
+                            <span class="mt-3 inline-flex items-center gap-1 text-amber-700 text-sm font-medium">
+                                Naar FAQ <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+
+                {{-- Support / Contact --}}
+                <a href="{{ url('#') }}"
+                    class="group bg-white rounded-2xl shadow-sm border border-gray-200/70 p-6 hover:shadow-md transition">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="h-11 w-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center ring-1 ring-rose-100">
+                            <i class="fa-solid fa-life-ring"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-semibold text-gray-900 group-hover:text-rose-700">Support / Contact
+                            </h4>
+                            <p class="mt-1 text-gray-500 text-sm">Meld een probleem of stel een vraag aan het
+                                beheerteam.</p>
+                            <span class="mt-3 inline-flex items-center gap-1 text-rose-700 text-sm font-medium">
+                                Neem contact op <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+
+                {{-- Release notes / Changelog --}}
+                <a href="{{ url('#') }}"
+                    class="group bg-white rounded-2xl shadow-sm border border-gray-200/70 p-6 hover:shadow-md transition">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="h-11 w-11 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center ring-1 ring-violet-100">
+                            <i class="fa-solid fa-timeline"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-semibold text-gray-900 group-hover:text-violet-700">Release notes
+                            </h4>
+                            <p class="mt-1 text-gray-500 text-sm">Bekijk de laatste wijzigingen en verbeteringen.</p>
+                            <span class="mt-3 inline-flex items-center gap-1 text-violet-700 text-sm font-medium">
+                                Open changelog <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+
+                {{-- API / Integraties --}}
+                <a href="{{ url('#') }}"
+                    class="group bg-white rounded-2xl shadow-sm border border-gray-200/70 p-6 hover:shadow-md transition">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="h-11 w-11 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center ring-1 ring-cyan-100">
+                            <i class="fa-solid fa-plug"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-semibold text-gray-900 group-hover:text-cyan-700">API & Integraties
+                            </h4>
+                            <p class="mt-1 text-gray-500 text-sm">Koppelingen en toekomstige API-endpoints.</p>
+                            <span class="mt-3 inline-flex items-center gap-1 text-cyan-700 text-sm font-medium">
+                                Meer informatie <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+
             </div>
         </section>
+
+        {{-- Extra witruimte --}}
+        <div class="h-6"></div>
     </main>
 </body>
 
 </html>
+    

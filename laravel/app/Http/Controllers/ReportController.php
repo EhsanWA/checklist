@@ -7,9 +7,6 @@ use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
-    /**
-     * Publiek overzicht (zonder auth), met filters op jouw velden.
-     */
     public function index(Request $request)
     {
         $reports = Report::query()
@@ -25,7 +22,6 @@ class ReportController extends Controller
             $q->where('description', 'like', '%' . $request->description . '%'))
             ->when($request->filled('status'), fn($q) =>
             $q->where('status', $request->status))
-            // optioneel: aangemaakt tussen
             ->when($request->filled('from'), fn($q) =>
             $q->whereDate('created_at', '>=', $request->from))
             ->when($request->filled('to'), fn($q) =>
@@ -36,23 +32,18 @@ class ReportController extends Controller
 
         return view('reports.index', [
             'reports' => $reports,
-            'search'  => null, // niet meer in gebruik
-            'from'    => $request->get('from'),
-            'to'      => $request->get('to'),
+            'from' => $request->get('from'),
+            'to' => $request->get('to'),
         ]);
     }
 
-    /**
-     * Beheer-overzicht met tab-tellers en sorting.
-     */
     public function beheer(Request $request)
     {
-        $status  = $request->string('status', 'all')->toString();   // all|draft|submitted|archived
+        $status  = $request->string('status', 'all')->toString();
         $q       = $request->string('q')->toString();
-        $sort    = $request->string('sort', 'created_desc')->toString(); // created_desc|created_asc|schip_naam_asc|...
+        $sort    = $request->string('sort', 'created_desc')->toString();
         $perPage = (int) $request->integer('per_page', 12);
 
-        // Tellers voor tabs
         $counts = [
             'all'       => Report::count(),
             'draft'     => Report::where('status', 'draft')->count(),
@@ -62,9 +53,7 @@ class ReportController extends Controller
 
         $query = Report::query();
 
-        if ($status !== 'all') {
-            $query->where('status', $status);
-        }
+        if ($status !== 'all') $query->where('status', $status);
 
         if ($q) {
             $query->where(function ($qq) use ($q) {
@@ -75,7 +64,6 @@ class ReportController extends Controller
             });
         }
 
-        // Sorteren (incl. aliasen voor oude 'title_*')
         switch ($sort) {
             case 'created_asc':
                 $query->orderBy('created_at', 'asc');
@@ -107,7 +95,7 @@ class ReportController extends Controller
                 $query->orderBy('monteur', 'desc');
                 break;
             default:
-                $query->orderBy('created_at', 'desc'); // created_desc
+                $query->orderBy('created_at', 'desc');
         }
 
         $reports = $query->paginate($perPage)->appends($request->query());
@@ -123,25 +111,21 @@ class ReportController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'schip_naam'     => ['required', 'string', 'max:120'],
-            'schip_nummer'   => ['nullable', 'string', 'max:50'],
+            'schip_naam' => ['required', 'string', 'max:120'],
+            'schip_nummer' => ['nullable', 'string', 'max:50'],
             'schip_bouwjaar' => ['nullable', 'integer', 'min:1800', 'max:' . (date('Y') + 1)],
-            'monteur'        => ['required', 'string', 'max:120'],
-            'description'    => ['nullable', 'string', 'max:5000'],
-            'status'         => ['required', 'in:draft,submitted,archived'],
+            'monteur' => ['required', 'string', 'max:120'],
+            'description' => ['nullable', 'string', 'max:5000'],
+            'status' => ['required', 'in:draft,submitted,archived'],
         ]);
 
         Report::create($data);
-
-        return redirect()->route('reports.beheer')
-            ->with('success', 'Rapportage aangemaakt.');
+        return redirect()->route('reports.beheer')->with('success', 'Rapportage aangemaakt.');
     }
 
     public function show(Report $report)
     {
-        // (optioneel) lijstje voor zijbalk/overzicht
         $reports = Report::select('id', 'schip_naam', 'created_at', 'status')->latest()->get();
-
         return view('reports.show', compact('report', 'reports'));
     }
 
@@ -153,25 +137,21 @@ class ReportController extends Controller
     public function update(Request $request, Report $report)
     {
         $data = $request->validate([
-            'schip_naam'     => ['required', 'string', 'max:120'],
-            'schip_nummer'   => ['nullable', 'string', 'max:50'],
+            'schip_naam' => ['required', 'string', 'max:120'],
+            'schip_nummer' => ['nullable', 'string', 'max:50'],
             'schip_bouwjaar' => ['nullable', 'integer', 'min:1800', 'max:' . (date('Y') + 1)],
-            'monteur'        => ['required', 'string', 'max:120'],
-            'description'    => ['nullable', 'string', 'max:5000'],
-            'status'         => ['required', 'in:draft,submitted,archived'],
+            'monteur' => ['required', 'string', 'max:120'],
+            'description' => ['nullable', 'string', 'max:5000'],
+            'status' => ['required', 'in:draft,submitted,archived'],
         ]);
 
         $report->update($data);
-
-        return redirect()->route('reports.beheer')
-            ->with('success', 'Rapportage bijgewerkt.');
+        return redirect()->route('reports.beheer')->with('success', 'Rapportage bijgewerkt.');
     }
 
     public function destroy(Report $report)
     {
         $report->delete();
-
-        return redirect()->route('reports.beheer')
-            ->with('success', 'Rapportage verwijderd.');
+        return redirect()->route('reports.beheer')->with('success', 'Rapportage verwijderd.');
     }
 }

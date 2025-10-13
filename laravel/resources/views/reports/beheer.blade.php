@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beheer - Reports</title>
+    <title>Beheer - Rapportages</title>
     @vite('resources/css/app.css')
+    <script src="https://kit.fontawesome.com/a2e0a4c3c1.js" crossorigin="anonymous"></script>
 </head>
 
 <body class="bg-gray-50 text-gray-900">
@@ -13,6 +14,7 @@
     @include('header')
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
         <header>
             <h1 class="text-3xl font-semibold tracking-tight">Beheer</h1>
             <p class="text-gray-600">Overzicht met filters, tabs en beheeracties.</p>
@@ -44,7 +46,7 @@
             @endforeach
         </nav>
 
-        {{-- Zoeken + sort --}}
+        {{-- Filters --}}
         <form method="GET" action="{{ route('reports.beheer') }}" class="bg-white rounded-2xl shadow p-5">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="md:col-span-2">

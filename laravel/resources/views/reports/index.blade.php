@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports</title>
+    <title>Rapportages</title>
     @vite('resources/css/app.css')
+    <script src="https://kit.fontawesome.com/a2e0a4c3c1.js" crossorigin="anonymous"></script>
 </head>
 
 <body class="bg-gray-50 text-gray-900">
 
-    {{-- Header --}}
     @include('header')
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -22,7 +22,7 @@
             </div>
         </header>
 
-        {{-- Filters op jouw velden --}}
+        {{-- Filters --}}
         <form method="GET" action="{{ route('reports.index') }}" class="bg-white rounded-2xl shadow p-5">
             <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
 
@@ -44,15 +44,13 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Bouwjaar</label>
                     <input type="number" name="schip_bouwjaar" value="{{ request('schip_bouwjaar') }}" min="1800"
                         max="{{ now()->year + 1 }}"
-                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-200 px-3 py-2"
-                        placeholder="{{ now()->year }}">
+                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-200 px-3 py-2">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Monteur</label>
                     <input type="text" name="monteur" value="{{ request('monteur') }}"
-                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-200 px-3 py-2"
-                        placeholder="Naam monteur">
+                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-200 px-3 py-2">
                 </div>
 
                 <div>
@@ -100,7 +98,7 @@
             </div>
         </form>
 
-        {{-- Lijst --}}
+        {{-- Tabel --}}
         <section class="bg-white rounded-2xl shadow">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -131,15 +129,9 @@
                                         </div>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 text-gray-700">
-                                    {{ $report->schip_nummer ?? '—' }}
-                                </td>
-                                <td class="px-6 py-4 text-gray-700">
-                                    {{ $report->schip_bouwjaar ?? '—' }}
-                                </td>
-                                <td class="px-6 py-4 text-gray-700">
-                                    {{ $report->monteur ?? '—' }}
-                                </td>
+                                <td class="px-6 py-4 text-gray-700">{{ $report->schip_nummer ?? '—' }}</td>
+                                <td class="px-6 py-4 text-gray-700">{{ $report->schip_bouwjaar ?? '—' }}</td>
+                                <td class="px-6 py-4 text-gray-700">{{ $report->monteur ?? '—' }}</td>
                                 <td class="px-6 py-4">
                                     @php
                                         $status = $report->status ?? '';
@@ -173,8 +165,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-12 text-center">
-                                    <div class="text-gray-500">Geen rapportages gevonden met deze filters.</div>
+                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                                    Geen rapportages gevonden met deze filters.
                                 </td>
                             </tr>
                         @endforelse

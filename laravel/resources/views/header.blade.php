@@ -4,6 +4,7 @@
     </div>
 
     <div class="ml-auto mr-4 flex items-center gap-3">
+        {{-- Alleen tonen als admin is ingelogd --}}
         @if (session('is_admin') === true)
             <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf
