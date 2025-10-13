@@ -47,7 +47,7 @@
                         </p>
 
                         <div class="mt-5">
-                            <a href="{{ route('reports.create') }}"
+                            <a href="{{ route('reports.index') }}"
                                 class="inline-flex items-center gap-2 font-medium text-sky-700 hover:text-sky-900">
                                 Ga naar formulier
                                 <i class="fa-solid fa-arrow-up-right-from-square text-sm"></i>
@@ -228,4 +228,3 @@
 </body>
 
 </html>
-    
