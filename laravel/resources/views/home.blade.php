@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>home</title>
     @vite('resources/css/app.css')
 </head>
 
@@ -29,7 +29,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {{-- Rapportage invullen --}}
                 {{-- TODO: vervang href="#" later met jouw route/url naar het formulier --}}
-                <a href="#" role="button" aria-label="Open het rapportageformulier"
+                <a href="{{ route('reports.index') }}" role="button" aria-label="Open het rapportageformulier"
                     class="group block rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 backdrop-blur p-6 sm:p-8 shadow-sm hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-sky-500">
                     <div class="flex items-start gap-4">
                         <span
@@ -63,7 +63,7 @@
 
                 {{-- Beheerder (login) --}}
                 {{-- TODO: vervang href="#" later met jouw route/url naar de beheer-login --}}
-                <a href="#" role="button" aria-label="Ga naar beheer login"
+                <a href="{{ route('reports.beheer') }}" role="button" aria-label="Ga naar beheer login"
                     class="group block rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 backdrop-blur p-6 sm:p-8 shadow-sm hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-amber-500">
                     <div class="flex items-start gap-4">
                         <span
