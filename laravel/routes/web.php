@@ -3,18 +3,16 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportController;
 
+Route::view('/', 'home');
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Beheer (geeft $counts mee via controller)
+Route::get('/reports/beheer', [ReportController::class, 'beheer'])->name('reports.beheer');
 
-Route::get('/', fn() => redirect()->route('reports.index'));
-Route::resource('reports', ReportController::class); // nu ook edit, update, destroy
+// (optioneel) oude pad laten redirecten
+Route::redirect('/beheer', '/reports/beheer');
 
-Route::get('/meetrapport', function () {
-    return view('meetrapport');
-});
+// Publiek overzicht via controller
+Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
-Route::get('/tabblad', function () {
-    return view('tabblad');
-});
+// Resource routes voor CRUD (index staat hierboven)
+Route::resource('reports', ReportController::class)->except(['index']);
