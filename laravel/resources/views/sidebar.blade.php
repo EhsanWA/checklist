@@ -14,7 +14,7 @@
                 'bg-sky-100 text-sky-900 ring-2 ring-white/50' => $r->id === $report->id, // highlight huidig
             ])>
                 <div class="font-medium truncate">
-                    {{ $r->title ?: 'Naamloos rapport' }}
+                    {{ $r->schip_naam ?: 'Naamloos rapport' }}
                 </div>
                 <div class="text-xs text-gray-500">
                     {{ $r->created_at->format('d-m-Y H:i') }}
