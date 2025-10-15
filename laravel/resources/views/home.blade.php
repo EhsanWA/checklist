@@ -142,7 +142,7 @@
                     </div>
                 </a>
 
-                {{-- FAQ --}}
+                {{-- leeg --}}
                 <a href="{{ url('#') }}"
                     class="group bg-white rounded-2xl shadow-sm border border-gray-200/70 p-6 hover:shadow-md transition">
                     <div class="flex items-start gap-4">
@@ -151,69 +151,10 @@
                             <i class="fa-solid fa-circle-question"></i>
                         </div>
                         <div class="flex-1">
-                            <h4 class="text-lg font-semibold text-gray-900 group-hover:text-amber-700">Veelgestelde
-                                vragen</h4>
-                            <p class="mt-1 text-gray-500 text-sm">Snel antwoord op de meest voorkomende vragen.</p>
+                            <h4 class="text-lg font-semibold text-gray-900 group-hover:text-amber-700">Extra informatie</h4>
+                            <p class="mt-1 text-gray-500 text-sm">Komt binnenkort!</p>
                             <span class="mt-3 inline-flex items-center gap-1 text-amber-700 text-sm font-medium">
-                                Naar FAQ <i class="fa-solid fa-arrow-right text-xs"></i>
-                            </span>
-                        </div>
-                    </div>
-                </a>
-
-                {{-- Support / Contact --}}
-                <a href="{{ url('#') }}"
-                    class="group bg-white rounded-2xl shadow-sm border border-gray-200/70 p-6 hover:shadow-md transition">
-                    <div class="flex items-start gap-4">
-                        <div
-                            class="h-11 w-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center ring-1 ring-rose-100">
-                            <i class="fa-solid fa-life-ring"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-lg font-semibold text-gray-900 group-hover:text-rose-700">Support / Contact
-                            </h4>
-                            <p class="mt-1 text-gray-500 text-sm">Meld een probleem of stel een vraag aan het
-                                beheerteam.</p>
-                            <span class="mt-3 inline-flex items-center gap-1 text-rose-700 text-sm font-medium">
-                                Neem contact op <i class="fa-solid fa-arrow-right text-xs"></i>
-                            </span>
-                        </div>
-                    </div>
-                </a>
-
-                {{-- Release notes / Changelog --}}
-                <a href="{{ url('#') }}"
-                    class="group bg-white rounded-2xl shadow-sm border border-gray-200/70 p-6 hover:shadow-md transition">
-                    <div class="flex items-start gap-4">
-                        <div
-                            class="h-11 w-11 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center ring-1 ring-violet-100">
-                            <i class="fa-solid fa-timeline"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-lg font-semibold text-gray-900 group-hover:text-violet-700">Release notes
-                            </h4>
-                            <p class="mt-1 text-gray-500 text-sm">Bekijk de laatste wijzigingen en verbeteringen.</p>
-                            <span class="mt-3 inline-flex items-center gap-1 text-violet-700 text-sm font-medium">
-                                Open changelog <i class="fa-solid fa-arrow-right text-xs"></i>
-                            </span>
-                        </div>
-                    </div>
-                </a>
-
-                {{-- API / Integraties --}}
-                <a href="{{ url('#') }}"
-                    class="group bg-white rounded-2xl shadow-sm border border-gray-200/70 p-6 hover:shadow-md transition">
-                    <div class="flex items-start gap-4">
-                        <div
-                            class="h-11 w-11 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center ring-1 ring-cyan-100">
-                            <i class="fa-solid fa-plug"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-lg font-semibold text-gray-900 group-hover:text-cyan-700">API & Integraties
-                            </h4>
-                            <p class="mt-1 text-gray-500 text-sm">Koppelingen en toekomstige API-endpoints.</p>
-                            <span class="mt-3 inline-flex items-center gap-1 text-cyan-700 text-sm font-medium">
-                                Meer informatie <i class="fa-solid fa-arrow-right text-xs"></i>
+                                Gaan! <i class="fa-solid fa-arrow-right text-xs"></i>
                             </span>
                         </div>
                     </div>

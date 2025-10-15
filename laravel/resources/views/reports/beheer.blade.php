@@ -15,9 +15,18 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
-        <header>
-            <h1 class="text-3xl font-semibold tracking-tight">Beheer</h1>
-            <p class="text-gray-600">Overzicht met filters, tabs en beheeracties.</p>
+        {{-- Titel + actieknop --}}
+        <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-3xl font-semibold tracking-tight">Beheer</h1>
+                <p class="text-gray-600">Overzicht met filters, tabs en beheeracties.</p>
+            </div>
+
+            <a href="{{ route('reports.create') }}"
+                class="inline-flex items-center gap-2 rounded-lg bg-sky-600 text-white px-4 py-2 font-medium hover:bg-sky-700 shadow transition w-full sm:w-auto justify-center">
+                <i class="fa-solid fa-plus"></i>
+                <span>Rapportage aanmaken</span>
+            </a>
         </header>
 
         {{-- Tabs --}}
@@ -72,17 +81,20 @@
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-200 px-3 py-2">
                         <option value="created_desc" {{ $sort === 'created_desc' ? 'selected' : '' }}>Nieuwste eerst
                         </option>
-                        <option value="created_asc" {{ $sort === 'created_asc' ? 'selected' : '' }}>Oudste eerst</option>
+                        <option value="created_asc" {{ $sort === 'created_asc' ? 'selected' : '' }}>Oudste eerst
+                        </option>
                         <option value="schip_naam_asc" {{ $sort === 'schip_naam_asc' ? 'selected' : '' }}>Schip A-Z
                         </option>
                         <option value="schip_naam_desc"{{ $sort === 'schip_naam_desc' ? 'selected' : '' }}>Schip Z-A
                         </option>
-                        <option value="bouwjaar_asc" {{ $sort === 'bouwjaar_asc' ? 'selected' : '' }}>Bouwjaar ↑</option>
+                        <option value="bouwjaar_asc" {{ $sort === 'bouwjaar_asc' ? 'selected' : '' }}>Bouwjaar ↑
+                        </option>
                         <option value="bouwjaar_desc" {{ $sort === 'bouwjaar_desc' ? 'selected' : '' }}>Bouwjaar ↓
                         </option>
                         <option value="nummer_asc" {{ $sort === 'nummer_asc' ? 'selected' : '' }}>Nummer ↑</option>
                         <option value="nummer_desc" {{ $sort === 'nummer_desc' ? 'selected' : '' }}>Nummer ↓</option>
-                        <option value="monteur_asc" {{ $sort === 'monteur_asc' ? 'selected' : '' }}>Monteur A-Z</option>
+                        <option value="monteur_asc" {{ $sort === 'monteur_asc' ? 'selected' : '' }}>Monteur A-Z
+                        </option>
                         <option value="monteur_desc" {{ $sort === 'monteur_desc' ? 'selected' : '' }}>Monteur Z-A
                         </option>
                     </select>
@@ -146,7 +158,8 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-gray-700">
-                                    {{ optional($report->created_at)->format('d-m-Y H:i') ?? '—' }}</td>
+                                    {{ optional($report->created_at)->format('d-m-Y H:i') ?? '—' }}
+                                </td>
                                 <td class="px-6 py-4 text-right">
                                     <a href="{{ route('reports.edit', $report) }}"
                                         class="mr-2 inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100">

@@ -10,7 +10,7 @@
 
 <body class="bg-gray-100 min-h-screen">
     <header class="bg-sky-500 p-4 drop-shadow-md">
-        <a href="{{ route('reports.index') }}" class="text-white underline">← Terug</a>
+        <a href="{{ route('reports.beheer') }}" class="text-white underline">← Terug</a>
     </header>
 
     <div class="max-w-2xl mx-auto bg-white rounded-lg shadow p-8 mt-10">
