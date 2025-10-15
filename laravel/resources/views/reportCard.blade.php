@@ -8,8 +8,5 @@
         Aangemaakt: {{ $report->created_at ?? 'Onbekend' }} • Status: {{ $report->status ?? 'N/A' }}
     </p>
 
-    <div class="flex gap-2 mt-4">
-        <a href="#"
-           class="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm">Bewerken</a>
-    </div>
+    <div class="flex gap-2 mt-4"></div>
 </div>
