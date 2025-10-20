@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 textarea.classList.add("border-red-500", "bg-red-50");
             } else {
                 textarea.classList.remove("border-red-500", "bg-red-50");
-            } 
+            }
         });
 
         btn.addEventListener("click", function () {
@@ -84,14 +84,11 @@ document.addEventListener("DOMContentLoaded", function () {
         return el;
     }
 
-
     // verwijdert bijzonderheden styling en elementen als het onder gecontroleerd valt
     function removeBijzonderheden(el) {
         if (!el.classList.contains("is-bijzonderheden")) return el;
 
-        el.classList.remove(
-            "is-bijzonderheden",
-        );
+        el.classList.remove("is-bijzonderheden");
 
         const btn = el.querySelector(".bijz-toggle");
         const textarea = el.querySelector(".bijz-textarea");
@@ -102,10 +99,8 @@ document.addEventListener("DOMContentLoaded", function () {
         return el;
     }
 
-
     // Initial binding
     document.querySelectorAll(".draggable-report").forEach(bindDraggable);
-
 
     // Drop onto tab contents
     document.querySelectorAll(".tab-content").forEach(function (tab) {
@@ -135,7 +130,6 @@ document.addEventListener("DOMContentLoaded", function () {
             tab.appendChild(draggedEl);
         });
     });
-
 
     // Drop onto tab buttons (also switch tabs)
     document.querySelectorAll(".tab-btn").forEach(function (btn) {

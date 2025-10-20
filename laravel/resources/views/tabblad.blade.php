@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meetrapport MRP2920</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/window.js',])
     <script src="https://kit.fontawesome.com/21e98e6012.js" crossorigin="anonymous"></script>
 </head>
 
@@ -16,14 +16,18 @@
     <!-- Tabs -->
     @include('tabNav')
 
-    <main class="p-4">
+    <main id="main" class="p-4">
+        <!-- Gecontroleerd tabblad content -->
         <div id="tab1-content" class="tab-content hidden"></div>
         
+        <!-- Opdrachten tabblad content -->
         <div id="tab2-content" class="tab-content relative z-1">
             @foreach($reports as $report)
             @include('reportCard', ['report' => $report])
             @endforeach
         </div>
+
+        <!-- bijzonderheden tabblad content -->
         <div id="tab3-content" class="tab-content hidden"></div>
     </main>
 
