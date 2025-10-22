@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use Illuminate\Http\Request;
-use App\Models\InspectionList;
-
 
 class ReportController extends Controller
 {
@@ -128,11 +126,7 @@ class ReportController extends Controller
     public function show(Report $report)
     {
         $reports = Report::select('id', 'schip_naam', 'created_at', 'status')->latest()->get();
-
-        // inspection
-        $inspection = InspectionList::with('categories.checks')->latest()->first();
-
-        return view('reports.show', compact('report', 'reports', 'inspection'));
+        return view('reports.show', compact('report', 'reports'));
     }
 
     public function edit(Report $report)

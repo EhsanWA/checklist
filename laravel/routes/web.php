@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdminPinController;
-use App\Http\Controllers\InspectionListController;
 
 Route::view('/', 'home');
 
@@ -35,17 +34,3 @@ Route::middleware('admin.pin')->group(function () {
 Route::resource('reports', ReportController::class)
     ->only(['show'])
     ->whereNumber('report'); // voorkom conflict met 'create', 'edit', etc.
-
-
-
-Route::middleware(['admin.pin'])->group(function () {
-    Route::get('/inspections/create', [InspectionListController::class, 'create'])->name('inspections.create');
-    Route::post('/inspections', [InspectionListController::class, 'store'])->name('inspections.store');
-
-    // (optioneel later) edit/update
-    Route::get('/inspections/{inspectionList}', [InspectionListController::class, 'show'])->name('inspections.show');
-});
-
-// routes/web.php
-// Route::post('/inspections', [InspectionListController::class, 'store'])->name('inspections.store'); // tijdelijk buiten group
-

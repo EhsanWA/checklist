@@ -19,10 +19,11 @@
     <main id="main" class="p-4">
         <!-- Gecontroleerd tabblad content -->
         <div id="tab1-content" class="tab-content hidden"></div>
-
+        
+        <!-- Opdrachten tabblad content -->
         <div id="tab2-content" class="tab-content relative z-1">
             @foreach($reports as $report)
-            @include('reportCard', ['report' => $report,])
+            @include('reportCard', ['report' => $report])
             @endforeach
         </div>
 
