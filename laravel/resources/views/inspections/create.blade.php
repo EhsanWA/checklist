@@ -18,6 +18,11 @@
     @includeIf('header')
 
     <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="inspectionBuilder()">
+        <a href="{{ route('reports.beheer') }}"
+            class="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4">
+            <span aria-hidden="true">&larr;</span>
+            Terug naar beheer
+        </a>
         <h1 class="text-2xl font-semibold mb-6">Nieuwe Inspectielijst</h1>
 
         {{-- direct boven <form> --}}
