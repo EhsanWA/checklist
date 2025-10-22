@@ -22,7 +22,7 @@
 
         <div id="tab2-content" class="tab-content relative z-1">
             @foreach($reports as $report)
-            @include('reportCard', ['report' => $report, ])
+            @include('reportCard', ['report' => $report,])
             @endforeach
         </div>
 
