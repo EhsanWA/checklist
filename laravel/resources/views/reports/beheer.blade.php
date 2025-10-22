@@ -22,11 +22,19 @@
                 <p class="text-gray-600">Overzicht met filters, tabs en beheeracties.</p>
             </div>
 
-            <a href="{{ route('reports.create') }}"
-                class="inline-flex items-center gap-2 rounded-lg bg-sky-600 text-white px-4 py-2 font-medium hover:bg-sky-700 shadow transition w-full sm:w-auto justify-center">
-                <i class="fa-solid fa-plus"></i>
-                <span>Rapportage aanmaken</span>
-            </a>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <a href="{{ route('inspections.create') }}"
+                    class="inline-flex items-center gap-2 rounded-lg bg-green-600 text-white px-4 py-2 font-medium hover:green-sky-800 shadow transition w-full sm:w-auto justify-center">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Inspectie lijst aanmaken</span>
+                </a>
+
+                <a href="{{ route('reports.create') }}"
+                    class="inline-flex items-center gap-2 rounded-lg bg-sky-600 text-white px-4 py-2 font-medium hover:bg-sky-700 shadow transition w-full sm:w-auto justify-center">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Rapportage aanmaken</span>
+                </a>
+            </div>
         </header>
 
         {{-- Tabs --}}
