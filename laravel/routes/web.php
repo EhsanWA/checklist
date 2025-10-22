@@ -45,3 +45,7 @@ Route::middleware(['admin.pin'])->group(function () {
     // (optioneel later) edit/update
     Route::get('/inspections/{inspectionList}', [InspectionListController::class, 'show'])->name('inspections.show');
 });
+
+// routes/web.php
+// Route::post('/inspections', [InspectionListController::class, 'store'])->name('inspections.store'); // tijdelijk buiten group
+

@@ -18,10 +18,10 @@
 
     <main class="p-4">
         <div id="tab1-content" class="tab-content hidden"></div>
-        
+
         <div id="tab2-content" class="tab-content relative z-1">
             @foreach($reports as $report)
-            @include('reportCard', ['report' => $report])
+            @include('reportCard', ['report' => $report, ])
             @endforeach
         </div>
         <div id="tab3-content" class="tab-content hidden"></div>

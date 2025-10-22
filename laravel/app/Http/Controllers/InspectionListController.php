@@ -64,6 +64,6 @@ class InspectionListController extends Controller
     public function show(InspectionList $inspectionList)
     {
         $inspectionList->load('categories.checks');
-        return view('inspections.show', compact('inspectionList'));
+        // return view('inspections.show', compact('inspectionList'));
     }
 }

@@ -20,11 +20,24 @@
     <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="inspectionBuilder()">
         <h1 class="text-2xl font-semibold mb-6">Nieuwe Inspectielijst</h1>
 
+        {{-- direct boven <form> --}}
+        @if ($errors->any())
+            <div class="mb-4 rounded-lg bg-red-50 text-red-700 px-4 py-3">
+                <p class="font-semibold">Er ging iets mis:</p>
+                <ul class="mt-2 list-disc list-inside text-sm">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         @if (session('success'))
             <div class="mb-4 rounded-lg bg-green-50 text-green-800 px-4 py-3">
                 {{ session('success') }}
             </div>
         @endif
+
 
         <form method="POST" action="{{ route('inspections.store') }}">
             @csrf
@@ -100,8 +113,11 @@
                                     </div>
 
                                     <div class="col-span-1 flex items-center gap-2">
+                                        {{-- stuur altijd een waarde mee --}}
+                                        <input type="hidden" :name="`categories[${ci}][checks][${ji}][required]`"
+                                            value="0">
                                         <input type="checkbox" :name="`categories[${ci}][checks][${ji}][required]`"
-                                            x-model="chk.required" class="rounded">
+                                            value="1" x-model="chk.required" class="rounded">
                                         <span class="text-sm">Verplicht</span>
                                     </div>
 
