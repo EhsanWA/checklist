@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meetrapport MRP2920</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/window.js'])
     <script src="https://kit.fontawesome.com/21e98e6012.js" crossorigin="anonymous"></script>
 </head>
 
