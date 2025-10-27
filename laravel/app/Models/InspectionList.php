@@ -12,4 +12,8 @@ class InspectionList extends Model
     {
         return $this->hasMany(InspectionCategory::class)->orderBy('sort');
     }
+    public function reports()
+    {
+        return $this->hasMany(Report::class);
+    }
 }

@@ -6,7 +6,6 @@ use App\Models\Report;
 use Illuminate\Http\Request;
 use App\Models\InspectionList;
 
-
 class ReportController extends Controller
 {
     public function index(Request $request)
@@ -28,14 +27,15 @@ class ReportController extends Controller
             $q->whereDate('created_at', '>=', $request->from))
             ->when($request->filled('to'), fn($q) =>
             $q->whereDate('created_at', '<=', $request->to))
+            ->with(['inspectionList:id,title']) // voor badge/naam in index
             ->orderByDesc('created_at')
             ->paginate((int) $request->integer('per_page', 12))
             ->withQueryString();
 
         return view('reports.index', [
             'reports' => $reports,
-            'from' => $request->get('from'),
-            'to' => $request->get('to'),
+            'from'    => $request->get('from'),
+            'to'      => $request->get('to'),
         ]);
     }
 
@@ -53,9 +53,11 @@ class ReportController extends Controller
             'archived'  => Report::where('status', 'archived')->count(),
         ];
 
-        $query = Report::query();
+        $query = Report::query()->with(['inspectionList:id,title']);
 
-        if ($status !== 'all') $query->where('status', $status);
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
 
         if ($q) {
             $query->where(function ($qq) use ($q) {
@@ -107,57 +109,86 @@ class ReportController extends Controller
 
     public function create()
     {
-        return view('reports.create');
+        // Voor de dropdown om te koppelen
+        $inspections = InspectionList::orderBy('created_at', 'desc')
+            ->get(['id', 'title']);
+
+        return view('reports.create', compact('inspections'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'schip_naam' => ['required', 'string', 'max:120'],
-            'schip_nummer' => ['nullable', 'string', 'max:50'],
-            'schip_bouwjaar' => ['nullable', 'integer', 'min:1800', 'max:' . (date('Y') + 1)],
-            'monteur' => ['required', 'string', 'max:120'],
-            'description' => ['nullable', 'string', 'max:5000'],
-            'status' => ['required', 'in:draft,submitted,archived'],
+            'schip_naam'        => ['required', 'string', 'max:120'],
+            'schip_nummer'      => ['nullable', 'string', 'max:50'],
+            'schip_bouwjaar'    => ['nullable', 'integer', 'min:1800', 'max:' . (date('Y') + 1)],
+            'monteur'           => ['required', 'string', 'max:120'],
+            'description'       => ['nullable', 'string', 'max:5000'],
+            'status'            => ['required', 'in:draft,submitted,archived'],
+            'inspection_list_id' => ['nullable', 'exists:inspection_lists,id'],
         ]);
 
         Report::create($data);
-        return redirect()->route('reports.beheer')->with('success', 'Rapportage aangemaakt.');
+
+        return redirect()
+            ->route('reports.beheer')
+            ->with('success', 'Rapportage aangemaakt.');
     }
 
     public function show(Report $report)
     {
-        $reports = Report::select('id', 'schip_naam', 'created_at', 'status')->latest()->get();
+        // Sidebar/overzicht
+        $reports = Report::select('id', 'schip_naam', 'created_at', 'status')
+            ->latest()->get();
 
-        // inspection
-        $inspection = InspectionList::with('categories.checks')->latest()->first();
+        // Laad de gekoppelde inspectielijst (inclusief nested relaties)
+        $report->load(['inspectionList.categories.checks']);
 
-        return view('reports.show', compact('report', 'reports', 'inspection'));
+        // Als je (tijdelijk) nog een fallback wilt naar "laatste inspectielijst"
+        // wanneer er geen koppeling is:
+        $inspection = $report->inspectionList
+            ?: InspectionList::with('categories.checks')->latest()->first();
+
+        return view('reports.show', [
+            'report'     => $report,
+            'reports'    => $reports,
+            'inspection' => $inspection,
+        ]);
     }
 
     public function edit(Report $report)
     {
-        return view('reports.edit', compact('report'));
+        $inspections = InspectionList::orderBy('created_at', 'desc')
+            ->get(['id', 'title']);
+
+        return view('reports.edit', compact('report', 'inspections'));
     }
 
     public function update(Request $request, Report $report)
     {
         $data = $request->validate([
-            'schip_naam' => ['required', 'string', 'max:120'],
-            'schip_nummer' => ['nullable', 'string', 'max:50'],
-            'schip_bouwjaar' => ['nullable', 'integer', 'min:1800', 'max:' . (date('Y') + 1)],
-            'monteur' => ['required', 'string', 'max:120'],
-            'description' => ['nullable', 'string', 'max:5000'],
-            'status' => ['required', 'in:draft,submitted,archived'],
+            'schip_naam'        => ['required', 'string', 'max:120'],
+            'schip_nummer'      => ['nullable', 'string', 'max:50'],
+            'schip_bouwjaar'    => ['nullable', 'integer', 'min:1800', 'max:' . (date('Y') + 1)],
+            'monteur'           => ['required', 'string', 'max:120'],
+            'description'       => ['nullable', 'string', 'max:5000'],
+            'status'            => ['required', 'in:draft,submitted,archived'],
+            'inspection_list_id' => ['nullable', 'exists:inspection_lists,id'],
         ]);
 
         $report->update($data);
-        return redirect()->route('reports.beheer')->with('success', 'Rapportage bijgewerkt.');
+
+        return redirect()
+            ->route('reports.beheer')
+            ->with('success', 'Rapportage bijgewerkt.');
     }
 
     public function destroy(Report $report)
     {
         $report->delete();
-        return redirect()->route('reports.beheer')->with('success', 'Rapportage verwijderd.');
+
+        return redirect()
+            ->route('reports.beheer')
+            ->with('success', 'Rapportage verwijderd.');
     }
 }
