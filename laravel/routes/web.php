@@ -5,7 +5,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdminPinController;
 use App\Http\Controllers\InspectionListController;
 
-Route::view('/', 'home');
+Route::view('/', 'home')->name('home');
 
 // Admin PIN login/logout
 Route::get('/admin/login',  [AdminPinController::class, 'show'])->name('admin.login');
@@ -21,6 +21,9 @@ Route::redirect('/beheer', '/reports/beheer');
 
 // Publiek overzicht
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+
+// Sent page 
+Route::view('/reports/sent', 'sentPage')->name('reports.sent');
 
 /**
  * >>> BELANGRIJK: eerst de beveiligde routes (create/edit/etc.)
@@ -48,4 +51,3 @@ Route::middleware(['admin.pin'])->group(function () {
 
 // routes/web.php
 // Route::post('/inspections', [InspectionListController::class, 'store'])->name('inspections.store'); // tijdelijk buiten group
-

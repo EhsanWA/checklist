@@ -165,7 +165,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 }, 300);
             } else {
                 // Hier kun je de verzendlogica toevoegen
-                alert("Rapport verzonden!");
+                // Navigate to the route that returns sentPage.blade.php
+                window.location.href = '/reports/sent';
                 if (overlay.parentNode === document.body) {
                     document.body.removeChild(overlay);
                 }
