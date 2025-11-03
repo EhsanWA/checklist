@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
         canvas.addEventListener("touchstart", function (e) {
             const rect = canvas.getBoundingClientRect();
             const touch = e.touches[0];
-            // Only prevent default if touch is inside the canvas
+            // alleen default voorkomen als touch binnen canvas is
             if (
                 touch.clientX >= rect.left &&
                 touch.clientX <= rect.right &&
