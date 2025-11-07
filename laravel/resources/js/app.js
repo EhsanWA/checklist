@@ -46,6 +46,85 @@ document.addEventListener("DOMContentLoaded", function () {
             "mb-4"
         );
 
+        // button om foto toe te voegen
+        const fotobtn = document.createElement("button");
+        fotobtn.type = "button";
+        fotobtn.className =
+            "inline-flex items-center px-3 py-1 rounded text-sm bg-green-500 text-white hover:bg-green-600 focus:outline-none mb-2";
+        const btnText = document.createElement("span");
+        btnText.className = "btn-text";
+        btnText.textContent = "Foto toevoegen";
+        const icon = document.createElement("i");
+        icon.className = "fas fa-camera ml-2";
+        fotobtn.appendChild(btnText);
+        fotobtn.appendChild(icon);
+
+        fotobtn.addEventListener("click", function () {
+            // Maak of hergebruik een verborgen file input en open de bestandsselector
+            let fileInput = el.querySelector(".report-photo-input");
+            if (!fileInput) {
+                fileInput = document.createElement("input");
+                fileInput.type = "file";
+                fileInput.accept = "image/*";
+                fileInput.className = "report-photo-input";
+                fileInput.style.display = "none";
+                const maxSize = 2 * 1024 * 1024; // 2MB
+                fileInput.addEventListener("change", function () {
+                    const file = this.files && this.files[0];
+                    if (!file) return;
+
+                    // bestandsgrootte controleren
+                    const maxSize = 2 * 1024 * 1024; // 2MB
+                    if (file.size > maxSize) {
+                        alert(
+                            "De geselecteerde foto is te groot. De maximale grootte is 2MB."
+                        );
+                        this.value = "";
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        // wrapper voor preview + verwijderknop
+                        const wrap = document.createElement("div");
+                        wrap.className = "photo-preview mt-2 relative";
+
+                        const img = document.createElement("img");
+                        img.src = e.target.result;
+                        img.alt = "Bijlage foto";
+                        img.className = "rounded shadow-md";
+                        img.style.maxWidth = "200px";
+                        img.style.maxHeight = "150px";
+                        img.style.width = "auto";
+                        img.style.height = "auto";
+
+                        const removeBtn = document.createElement("button");
+                        removeBtn.type = "button";
+                        removeBtn.className =
+                            "remove-photo absolute top-1 right-1 bg-red-500 text-white px-2 py-1 rounded text-xs";
+                        removeBtn.textContent = "Verwijder";
+                        removeBtn.addEventListener("click", function () {
+                            wrap.remove();
+                            fileInput.value = "";
+                        });
+
+                        wrap.appendChild(img);
+                        wrap.appendChild(removeBtn);
+                        el.appendChild(wrap);
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                el.appendChild(fileInput);
+            }
+
+            // trigger file selector
+            fileInput.click();
+        });
+
+        el.appendChild(fotobtn);
+
+        // button om bijzonderheden tekstvak te tonen/verbergen
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className =
@@ -62,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 textarea.classList.add("border-red-500", "bg-red-50");
             } else {
                 textarea.classList.remove("border-red-500", "bg-red-50");
-            } 
+            }
         });
 
         btn.addEventListener("click", function () {
@@ -84,14 +163,11 @@ document.addEventListener("DOMContentLoaded", function () {
         return el;
     }
 
-
     // verwijdert bijzonderheden styling en elementen als het onder gecontroleerd valt
     function removeBijzonderheden(el) {
         if (!el.classList.contains("is-bijzonderheden")) return el;
 
-        el.classList.remove(
-            "is-bijzonderheden",
-        );
+        el.classList.remove("is-bijzonderheden");
 
         const btn = el.querySelector(".bijz-toggle");
         const textarea = el.querySelector(".bijz-textarea");
@@ -102,12 +178,10 @@ document.addEventListener("DOMContentLoaded", function () {
         return el;
     }
 
-
     // Initial binding
     document.querySelectorAll(".draggable-report").forEach(bindDraggable);
 
-
-    // Drop onto tab contents
+    // Drop op tab contents
     document.querySelectorAll(".tab-content").forEach(function (tab) {
         tab.addEventListener("dragover", function (ev) {
             ev.preventDefault();
@@ -136,8 +210,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-
-    // Drop onto tab buttons (also switch tabs)
+    // Drop op tab buttons (en switch tabs)
     document.querySelectorAll(".tab-btn").forEach(function (btn) {
         btn.addEventListener("dragover", function (ev) {
             ev.preventDefault();
