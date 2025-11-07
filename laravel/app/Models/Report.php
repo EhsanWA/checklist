@@ -19,6 +19,6 @@ class Report extends Model
 
     public function inspectionList()
     {
-        return $this->belongsTo(InspectionList::class); // model van jouw inspectielijst
+        return $this->belongsTo(InspectionList::class, 'inspection_list_id');
     }
 }

@@ -138,8 +138,9 @@ class ReportController extends Controller
     public function show(Report $report)
     {
         // Sidebar/overzicht
-        $reports = Report::select('id', 'schip_naam', 'created_at', 'status')
-            ->latest()->get();
+        $reports = Report::with(['inspectionList.categories.checks'])
+            ->orderByDesc('created_at')
+            ->get();
 
         // Laad de gekoppelde inspectielijst (inclusief nested relaties)
         $report->load(['inspectionList.categories.checks']);
