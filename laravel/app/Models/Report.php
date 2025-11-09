@@ -15,7 +15,14 @@ class Report extends Model
         'monteur',
         'description',
         'status',
-        'inspection_list_id'
+        'inspection_list_id',
+        'signature_path',
+        'submitted_pdf_path',
+        'submitted_at',
+    ];
+
+    protected $casts = [
+        'submitted_at' => 'datetime',
     ];
 
     public function inspectionList()

@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\InspectionList;
 use App\Models\ReportCheckItem;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ReportController extends Controller
 {
@@ -208,16 +211,87 @@ class ReportController extends Controller
             'checks.*.photos.*' => ['nullable', 'image', 'max:5120'],
         ]);
 
-        $checksPayload = $validated['checks'];
+        [$ok, $message] = $this->syncCheckItems($report, $validated['checks']);
 
+        if (!$ok) {
+            return back()
+                ->withErrors(['progress' => $message])
+                ->withInput();
+        }
+
+        return back()->with('success', 'Rapportage voortgang opgeslagen.');
+    }
+
+    public function submit(Request $request, Report $report)
+    {
+        $validated = $request->validate([
+            'checks' => ['required', 'array'],
+            'checks.*.status' => ['required', 'in:pending,gecontroleerd,bijzonderheden'],
+            'checks.*.notes' => ['nullable', 'string', 'max:2000'],
+            'checks.*.photos' => ['sometimes', 'array'],
+            'checks.*.photos.*' => ['nullable', 'image', 'max:5120'],
+            'signature' => ['required', 'string'],
+        ]);
+
+        [$ok, $message] = $this->syncCheckItems($report, $validated['checks']);
+
+        if (!$ok) {
+            return back()
+                ->withErrors(['progress' => $message])
+                ->withInput();
+        }
+
+        $oldSignature = $report->signature_path;
+        $oldPdf = $report->submitted_pdf_path;
+
+        $signaturePath = $this->storeSignature($validated['signature'], $report);
+
+        if ($oldSignature && $oldSignature !== $signaturePath) {
+            Storage::disk('public')->delete($oldSignature);
+        }
+
+        $report->load(['inspectionList.categories.checks', 'checkItems']);
+
+        $groupedChecks = $this->groupChecksForExport($report);
+
+        $signatureImage = null;
+        if ($signaturePath && Storage::disk('public')->exists($signaturePath)) {
+            $signatureImage = 'data:image/png;base64,' . base64_encode(Storage::disk('public')->get($signaturePath));
+        }
+
+        $pdf = Pdf::loadView('reports.pdf', [
+            'report' => $report,
+            'groupedChecks' => $groupedChecks,
+            'signatureImage' => $signatureImage,
+        ])->setPaper('a4');
+
+        $pdfPath = "reports/report-{$report->id}-" . now()->format('YmdHis') . '.pdf';
+        Storage::disk('public')->put($pdfPath, $pdf->output());
+
+        if ($oldPdf && $oldPdf !== $pdfPath) {
+            Storage::disk('public')->delete($oldPdf);
+        }
+
+        $report->update([
+            'signature_path' => $signaturePath,
+            'submitted_pdf_path' => $pdfPath,
+            'submitted_at' => now(),
+            'status' => 'submitted',
+        ]);
+
+        return redirect()
+            ->route('reports.show', $report)
+            ->with('success', 'Rapportage verzonden en PDF opgeslagen.');
+    }
+
+    private function syncCheckItems(Report $report, array $checksPayload): array
+    {
         $complete = collect($checksPayload)->every(
             fn($check) => in_array($check['status'], ['gecontroleerd', 'bijzonderheden'], true)
         );
 
         if (!$complete) {
-            return back()
-                ->withErrors(['progress' => 'Niet alle controles zijn toegewezen aan Gecontroleerd of Bijzonderheden.'])
-                ->withInput();
+            return [false, 'Niet alle controles zijn toegewezen aan Gecontroleerd of Bijzonderheden.'];
         }
 
         foreach ($checksPayload as $checkId => $payload) {
@@ -256,6 +330,74 @@ class ReportController extends Controller
             $item->save();
         }
 
-        return back()->with('success', 'Rapportage voortgang opgeslagen.');
+        return [true, null];
+    }
+
+    private function storeSignature(string $rawSignature, Report $report): string
+    {
+        if (!Str::startsWith($rawSignature, 'data:image')) {
+            throw ValidationException::withMessages([
+                'signature' => 'Ongeldig handtekening-formaat.',
+            ]);
+        }
+
+        if (!str_contains($rawSignature, ',')) {
+            throw ValidationException::withMessages([
+                'signature' => 'Ongeldig handtekening-formaat.',
+            ]);
+        }
+
+        [, $data] = explode(',', $rawSignature, 2);
+        $binary = base64_decode($data);
+
+        if ($binary === false) {
+            throw ValidationException::withMessages([
+                'signature' => 'Het tekenen is niet gelukt, probeer opnieuw.',
+            ]);
+        }
+
+        $path = "signatures/report-{$report->id}-" . now()->format('YmdHis') . '.png';
+        Storage::disk('public')->put($path, $binary);
+
+        return $path;
+    }
+
+    private function groupChecksForExport(Report $report): array
+    {
+        $report->loadMissing(['inspectionList.categories.checks', 'checkItems']);
+
+        $items = $report->checkItems->keyBy('inspection_check_id');
+
+        $result = [
+            'gecontroleerd' => [],
+            'bijzonderheden' => [],
+        ];
+
+        if (!$report->inspectionList) {
+            return $result;
+        }
+
+        foreach ($report->inspectionList->categories as $category) {
+            foreach ($category->checks as $check) {
+                $item = $items->get($check->id);
+                if (!$item) {
+                    continue;
+                }
+
+                if (! isset($result[$item->status])) {
+                    $result[$item->status] = [];
+                }
+
+                $result[$item->status][] = [
+                    'category' => $category->name,
+                    'label' => $check->label ?? 'Controle #' . $check->id,
+                    'code' => $check->code,
+                    'notes' => $item->notes,
+                    'photos' => $item->photos ?? [],
+                ];
+            }
+        }
+
+        return $result;
     }
 }

@@ -38,6 +38,8 @@ Route::resource('reports', ReportController::class)
 
 Route::post('/reports/{report}/progress', [ReportController::class, 'saveProgress'])
     ->name('reports.progress');
+Route::post('/reports/{report}/submit', [ReportController::class, 'submit'])
+    ->name('reports.submit');
 
 
 
