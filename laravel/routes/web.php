@@ -36,6 +36,9 @@ Route::resource('reports', ReportController::class)
     ->only(['show'])
     ->whereNumber('report'); // voorkom conflict met 'create', 'edit', etc.
 
+Route::post('/reports/{report}/progress', [ReportController::class, 'saveProgress'])
+    ->name('reports.progress');
+
 
 
 Route::middleware(['admin.pin'])->group(function () {
@@ -48,4 +51,3 @@ Route::middleware(['admin.pin'])->group(function () {
 
 // routes/web.php
 // Route::post('/inspections', [InspectionListController::class, 'store'])->name('inspections.store'); // tijdelijk buiten group
-

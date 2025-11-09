@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\InspectionList;
+use App\Models\ReportCheckItem;
 
 class Report extends Model
 {
@@ -20,5 +21,10 @@ class Report extends Model
     public function inspectionList()
     {
         return $this->belongsTo(InspectionList::class, 'inspection_list_id');
+    }
+
+    public function checkItems()
+    {
+        return $this->hasMany(ReportCheckItem::class);
     }
 }

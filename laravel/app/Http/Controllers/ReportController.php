@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Report;
 use Illuminate\Http\Request;
 use App\Models\InspectionList;
+use App\Models\ReportCheckItem;
+use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
@@ -143,7 +145,9 @@ class ReportController extends Controller
             ->get();
 
         // Laad de gekoppelde inspectielijst (inclusief nested relaties)
-        $report->load(['inspectionList.categories.checks']);
+        $report->load(['inspectionList.categories.checks', 'checkItems']);
+
+        $checkItems = $report->checkItems->keyBy('inspection_check_id');
 
         // Als je (tijdelijk) nog een fallback wilt naar "laatste inspectielijst"
         // wanneer er geen koppeling is:
@@ -151,9 +155,10 @@ class ReportController extends Controller
             ?: InspectionList::with('categories.checks')->latest()->first();
 
         return view('reports.show', [
-            'report'     => $report,
-            'reports'    => $reports,
-            'inspection' => $inspection,
+            'report'      => $report,
+            'reports'     => $reports,
+            'inspection'  => $inspection,
+            'checkItems'  => $checkItems,
         ]);
     }
 
@@ -191,5 +196,66 @@ class ReportController extends Controller
         return redirect()
             ->route('reports.beheer')
             ->with('success', 'Rapportage verwijderd.');
+    }
+
+    public function saveProgress(Request $request, Report $report)
+    {
+        $validated = $request->validate([
+            'checks' => ['required', 'array'],
+            'checks.*.status' => ['required', 'in:pending,gecontroleerd,bijzonderheden'],
+            'checks.*.notes' => ['nullable', 'string', 'max:2000'],
+            'checks.*.photos' => ['sometimes', 'array'],
+            'checks.*.photos.*' => ['nullable', 'image', 'max:5120'],
+        ]);
+
+        $checksPayload = $validated['checks'];
+
+        $complete = collect($checksPayload)->every(
+            fn($check) => in_array($check['status'], ['gecontroleerd', 'bijzonderheden'], true)
+        );
+
+        if (!$complete) {
+            return back()
+                ->withErrors(['progress' => 'Niet alle controles zijn toegewezen aan Gecontroleerd of Bijzonderheden.'])
+                ->withInput();
+        }
+
+        foreach ($checksPayload as $checkId => $payload) {
+            $item = ReportCheckItem::firstOrNew([
+                'report_id' => $report->id,
+                'inspection_check_id' => $checkId,
+            ]);
+
+            $status = $payload['status'];
+            $item->status = $status;
+
+            if ($status === 'bijzonderheden') {
+                $item->notes = $payload['notes'] ?? null;
+                $existingPhotos = $item->photos ?? [];
+
+                if (!empty($payload['photos'])) {
+                    foreach ($payload['photos'] as $photo) {
+                        if ($photo) {
+                            $existingPhotos[] = $photo->store("report-checks/{$report->id}", 'public');
+                        }
+                    }
+                }
+
+                $item->photos = $existingPhotos ? array_values(array_filter($existingPhotos)) : null;
+            } else {
+                if (!empty($item->photos)) {
+                    foreach ($item->photos as $storedPath) {
+                        Storage::disk('public')->delete($storedPath);
+                    }
+                }
+
+                $item->notes = null;
+                $item->photos = null;
+            }
+
+            $item->save();
+        }
+
+        return back()->with('success', 'Rapportage voortgang opgeslagen.');
     }
 }

@@ -16,10 +16,25 @@
     <!-- Tabs -->
     @include('tabNav')
 
-    <main class="p-4 space-y-6">
+    <form id="report-progress-form" method="POST" action="{{ route('reports.progress', $report) }}"
+        enctype="multipart/form-data" class="p-4 space-y-6">
+        @csrf
+
+        @if (session('success'))
+            <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if ($errors->has('progress'))
+            <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700">
+                {{ $errors->first('progress') }}
+            </div>
+        @endif
+
         <div id="tab1-content" class="tab-content hidden">
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div class="flex flex-col gap-1 mb-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                     <h2 class="text-2xl font-semibold text-slate-800">Gecontroleerd</h2>
                     <p class="text-sm text-slate-500">Sleep checks hierheen of gebruik de V-knop.</p>
                 </div>
@@ -50,7 +65,7 @@
                     </div>
                     <div>
                         <p class="text-xs uppercase tracking-wide text-slate-500">Omschrijving</p>
-                        <p class="text-sm text-slate-700 max-h-24 overflow-hidden">
+                        <p class="max-h-24 overflow-hidden text-sm text-slate-700">
                             {{ $report->description ?: 'Geen beschrijving toegevoegd.' }}
                         </p>
                     </div>
@@ -67,7 +82,7 @@
                     </div>
                     @if ($report->inspectionList)
                         <a href="{{ route('inspections.show', $report->inspectionList) }}"
-                            class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:border-sky-400 hover:text-sky-600 transition">
+                            class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-sky-400 hover:text-sky-600">
                             Volledige inspectie
                             <i class="fa-solid fa-up-right-from-square text-xs"></i>
                         </a>
@@ -76,9 +91,9 @@
 
                 @if ($report->inspectionList)
                     <div class="mt-4 checklist-dropzone min-h-[320px] rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/60 p-4 transition"
-                        data-dropzone="opdrachten">
+                        data-dropzone="pending">
                         <p class="text-sm text-slate-400" data-empty-state>Alle checks zijn verwerkt.</p>
-                        @include('reportCard', ['report' => $report])
+                        @include('reportCard', ['report' => $report, 'checkItems' => $checkItems ?? collect()])
                     </div>
                 @else
                     <div class="mt-4 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-yellow-900">
@@ -90,7 +105,7 @@
 
         <div id="tab3-content" class="tab-content hidden">
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div class="flex flex-col gap-1 mb-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                     <h2 class="text-2xl font-semibold text-slate-800">Bijzonderheden</h2>
                     <p class="text-sm text-slate-500">Sleep checks hierheen of gebruik de X-knop.</p>
                 </div>
@@ -100,7 +115,18 @@
                 </div>
             </div>
         </div>
-    </main>
+
+        <div class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
+            <p data-open-warning class="text-slate-500">
+                Sleep alle controles naar Gecontroleerd of Bijzonderheden om op te kunnen slaan.
+            </p>
+            <button type="submit" id="save-report-btn"
+                class="rounded-full bg-sky-600 px-6 py-2 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50"
+                disabled>
+                Rapportage opslaan
+            </button>
+        </div>
+    </form>
 
     <!-- Sidebar -->
     @include('sidebar')
@@ -139,12 +165,20 @@
     initChecklistBoard();
 
     function initChecklistBoard() {
-        const dropzones = document.querySelectorAll('[data-dropzone]');
+        const form = document.getElementById("report-progress-form");
+        if (!form) {
+            return;
+        }
+
+        const dropzones = form.querySelectorAll('[data-dropzone]');
         if (!dropzones.length) {
             return;
         }
 
+        const saveBtn = document.getElementById("save-report-btn");
+        const warning = document.querySelector('[data-open-warning]');
         const zoneMap = {};
+
         dropzones.forEach((zone) => {
             const key = zone.dataset.dropzone;
             zoneMap[key] = zone;
@@ -162,16 +196,14 @@
                 event.preventDefault();
                 zone.classList.remove('border-sky-300', 'bg-white');
                 const itemId = event.dataTransfer.getData('text/plain');
-                const item = document.querySelector(`[data-check-item=\"${itemId}\"]`);
+                const item = form.querySelector(`[data-check-item="${itemId}"]`);
                 if (item) {
-                    zone.appendChild(item);
-                    item.dataset.status = key;
-                    updateEmptyStates();
+                    moveItem(item, key);
                 }
             });
         });
 
-        const items = document.querySelectorAll('[data-check-item]');
+        const items = form.querySelectorAll('[data-check-item]');
         items.forEach((item) => {
             item.setAttribute('draggable', 'true');
             item.addEventListener('dragstart', (event) => {
@@ -186,17 +218,51 @@
             item.querySelectorAll('[data-move-to]').forEach((btn) => {
                 btn.addEventListener('click', () => {
                     const target = btn.dataset.moveTo;
-                    if (zoneMap[target]) {
-                        zoneMap[target].appendChild(item);
-                        item.dataset.status = target;
-                        updateEmptyStates();
-                        zoneMap[target].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
+                    moveItem(item, target);
+                    zoneMap[target]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 });
             });
+
+            const initialStatus = item.dataset.status || 'pending';
+            moveItem(item, initialStatus);
         });
 
         updateEmptyStates();
+
+        function moveItem(item, targetKey) {
+            const zone = zoneMap[targetKey] ?? zoneMap.pending;
+            if (!zone) {
+                return;
+            }
+
+            zone.appendChild(item);
+            item.dataset.status = targetKey;
+
+            const statusInput = item.querySelector('[data-status-field]');
+            if (statusInput) {
+                statusInput.value = targetKey;
+            }
+
+            toggleDetails(item);
+            updateEmptyStates();
+        }
+
+        function toggleDetails(item) {
+            const wrapper = item.querySelector('[data-note-wrapper]');
+            const noteField = item.querySelector('[data-note-field]');
+            const photoField = item.querySelector('[data-photo-field]');
+            const isSpecial = item.dataset.status === 'bijzonderheden';
+
+            if (wrapper) {
+                wrapper.classList.toggle('hidden', !isSpecial);
+            }
+            if (noteField) {
+                noteField.disabled = !isSpecial;
+            }
+            if (photoField) {
+                photoField.disabled = !isSpecial;
+            }
+        }
 
         function updateEmptyStates() {
             dropzones.forEach((zone) => {
@@ -206,6 +272,15 @@
                     helper.classList.toggle('hidden', !isEmpty);
                 }
             });
+
+            const pendingHasItems = zoneMap.pending && zoneMap.pending.querySelector('[data-check-item]');
+            if (saveBtn) {
+                saveBtn.disabled = !!pendingHasItems;
+                saveBtn.classList.toggle('opacity-50', !!pendingHasItems);
+            }
+            if (warning) {
+                warning.classList.toggle('hidden', !pendingHasItems);
+            }
         }
     }
 </script>
