@@ -9,7 +9,9 @@
     <script src="https://kit.fontawesome.com/21e98e6012.js" crossorigin="anonymous"></script>
 </head>
 
-<body class="bg-gray-50 text-gray-800">
+<body class="min-h-[100dvh] bg-gray-50 text-gray-800">
+    @php use Illuminate\Support\Facades\Storage; @endphp
+
     {{-- Header --}}
     @include('header')
 
@@ -19,7 +21,7 @@
     </div>
 
     <form id="report-progress-form" method="POST" action="{{ route('reports.progress', $report) }}"
-        enctype="multipart/form-data" class="max-w-5xl mx-auto p-4 space-y-6">
+        enctype="multipart/form-data" class="max-w-5xl mx-auto p-4 space-y-6 pb-32">
         @csrf
 
         @if (session('success'))
@@ -87,12 +89,46 @@
                             Gebruik de V- of X-knop of tik om de status te wisselen. Sleep is optioneel.
                         </p>
                     </div>
+
                     @if ($report->inspectionList)
-                        <a href="{{ route('inspections.show', $report->inspectionList) }}"
-                            class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-sky-400 hover:text-sky-600">
-                            Volledige inspectie
-                            <i class="fa-solid fa-up-right-from-square text-xs"></i>
-                        </a>
+                        <div class="flex items-center gap-2" data-pdf-menu>
+                            <a href="{{ route('inspections.show', $report->inspectionList) }}" target="_blank"
+                                class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-sky-400 hover:text-sky-600">
+                                Volledige inspectie
+                                <i class="fa-solid fa-up-right-from-square text-xs"></i>
+                            </a>
+
+                            <div class="relative">
+                                <button type="button"
+                                    class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:border-sky-400 hover:text-sky-600"
+                                    data-pdf-toggle>
+                                    Verzonden PDF's
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </button>
+                                <div class="pdf-dropdown hidden absolute right-0 top-full mt-2 w-64 rounded-2xl border border-slate-200 bg-white shadow-xl z-10"
+                                    data-pdf-dropdown>
+                                    <div class="border-b border-slate-100 px-4 py-2">
+                                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                            Verzonden PDF's</p>
+                                    </div>
+                                    @if (($submittedPdfs ?? collect())->isEmpty())
+                                        <p class="px-4 py-3 text-sm text-slate-500">Nog geen verzonden bestanden.</p>
+                                    @else
+                                        <ul class="max-h-60 overflow-y-auto">
+                                            @foreach ($submittedPdfs as $pdf)
+                                                <li>
+                                                    <a href="{{ Storage::url($pdf) }}" target="_blank"
+                                                        class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                                        <i class="fa-solid fa-file-pdf text-sky-500"></i>
+                                                        <span class="truncate">{{ basename($pdf) }}</span>
+                                                    </a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
                     @endif
                 </div>
 
@@ -157,47 +193,15 @@
             </div>
         </div>
 
-        {{-- Sticky actiebar onderin --}}
-        <div id="sticky-actions"
-            class="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur px-4 py-3">
-            <div class="mx-auto flex max-w-5xl items-center gap-3">
-                <div class="hidden sm:flex items-center text-sm text-slate-600" id="progress-counter">
-                    <i class="fa-solid fa-list-check mr-2"></i>
-                    <span><b data-count-done>0</b>/<b data-count-total>0</b> gereed</span>
-                </div>
-
-                <button type="button" id="open-action-modal"
-                    class="ml-auto hidden rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring focus:ring-slate-200">
-                    Handtekening & verzenden
-                </button>
-
-                <button type="submit" id="save-report-btn"
-                    class="rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-                    disabled>
-                    Opslaan
-                </button>
-
-                <button type="submit" id="send-report-btn" formaction="{{ route('reports.submit', $report) }}"
-                    class="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-                    disabled>
-                    Versturen
-                </button>
-            </div>
-        </div>
-
-        {{-- Modal: afronden + handtekening --}}
-        <div id="action-modal"
-            class="fixed inset-0 z-50 hidden items-end justify-center bg-slate-900/60 p-4 lg:items-center">
-            <div class="w-full max-w-4xl rounded-3xl bg-white p-5 shadow-2xl">
+        {{-- Modal: afronden + handtekening (centered) --}}
+        <div id="action-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/60 p-4">
+            <div class="w-full max-w-2xl rounded-3xl bg-white p-5 shadow-2xl">
                 <div class="flex items-start justify-between gap-3 border-b border-slate-100 pb-4">
                     <div>
                         <h2 class="text-xl font-semibold text-slate-900">Rapportage afronden</h2>
-                        <p class="text-sm text-slate-500">
-                            Controleer alles en onderteken om het rapport te verzenden.
-                        </p>
+                        <p class="text-sm text-slate-500">Teken en verstuur de rapportage.</p>
                         <p data-open-warning class="mt-2 text-sm font-medium text-amber-600">
-                            Sleep alle controles naar Gecontroleerd of Bijzonderheden voordat je gaat opslaan of
-                            verzenden.
+                            Sleep alle controles naar Gecontroleerd of Bijzonderheden voordat je verstuurt.
                         </p>
                     </div>
                     <button type="button" id="close-action-modal"
@@ -206,66 +210,56 @@
                     </button>
                 </div>
 
-                <div class="mt-4 flex flex-col gap-6 lg:flex-row">
-                    <div class="flex-1 space-y-4">
-                        <button type="submit" id="save-report-btn-modal"
-                            class="w-full rounded-2xl bg-sky-600 px-6 py-3 text-base font-semibold text-white transition disabled:opacity-50"
-                            disabled>
-                            Rapportage opslaan
-                        </button>
-
-                        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                            <p class="text-sm font-semibold text-slate-800">Handtekening</p>
-                            <p class="text-xs text-slate-500">Teken om de rapportage officieel te maken.</p>
-                            <canvas id="signature-pad"
-                                class="mt-3 w-full rounded-lg border border-slate-200 bg-white shadow-inner"
-                                style="touch-action: none;" width="900" height="220"></canvas>
-                            <input type="hidden" name="signature" id="signature-input">
-                            <div class="mt-2 flex flex-wrap items-center gap-2">
-                                <button type="button" id="signature-clear"
-                                    class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
-                                    Wis handtekening
-                                </button>
-                                <span data-signature-warning class="hidden text-xs font-semibold text-rose-600">
-                                    Plaats eerst een handtekening om te versturen.
-                                </span>
-                            </div>
+                <div class="mt-4 space-y-4">
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                        <p class="text-sm font-semibold text-slate-800">Handtekening</p>
+                        <p class="text-xs text-slate-500">Teken om de rapportage officieel te maken.</p>
+                        <canvas id="signature-pad"
+                            class="mt-3 w-full rounded-lg border border-slate-200 bg-white shadow-inner"
+                            style="touch-action: none;" width="900" height="220"></canvas>
+                        <input type="hidden" name="signature" id="signature-input">
+                        <div class="mt-2 flex flex-wrap items-center gap-2">
+                            <button type="button" id="signature-clear"
+                                class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
+                                Wis handtekening
+                            </button>
+                            <span data-signature-warning class="hidden text-xs font-semibold text-rose-600">
+                                Plaats eerst een handtekening om te versturen.
+                            </span>
                         </div>
                     </div>
 
-                    <div class="flex-1 space-y-4">
-                        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-sm text-slate-600">
-                            <p class="text-sm font-semibold text-slate-800">Verzenden</p>
-                            <p class="text-xs text-slate-500">
-                                Versturen wordt pas mogelijk als alle controles verwerkt zijn en een handtekening is
-                                gezet.
-                            </p>
-
-                            @if ($report->submitted_pdf_path)
-                                <div
-                                    class="mt-3 rounded-xl border border-slate-100 bg-white px-4 py-3 text-xs text-slate-600">
-                                    <p class="text-sm font-semibold text-slate-800">Laatste verzending</p>
-                                    <p>{{ optional($report->submitted_at)->format('d-m-Y H:i') ?? 'Onbekend' }}</p>
-                                    <a href="{{ \Illuminate\Support\Facades\Storage::url($report->submitted_pdf_path) }}"
-                                        target="_blank"
-                                        class="mt-2 inline-flex items-center gap-2 text-sky-600 underline">
-                                        <i class="fa-solid fa-file-pdf"></i> Download laatste PDF
-                                    </a>
-                                </div>
-                            @endif
-                        </div>
-
-                        <button type="submit" id="send-report-btn-modal"
-                            formaction="{{ route('reports.submit', $report) }}"
-                            class="w-full rounded-2xl bg-emerald-600 px-6 py-3 text-base font-semibold text-white transition disabled:opacity-50"
-                            disabled>
-                            Verstuur rapportage
-                        </button>
-                    </div>
+                    <button type="submit" id="send-report-btn" formaction="{{ route('reports.submit', $report) }}"
+                        class="w-full rounded-2xl bg-emerald-600 px-6 py-3 text-base font-semibold text-white transition disabled:opacity-50"
+                        disabled>
+                        Verstuur rapportage
+                    </button>
                 </div>
             </div>
         </div>
     </form>
+
+    <!-- Sticky actiebar onderin - OUTSIDE the form -->
+    <div id="sticky-actions"
+        class="fixed left-0 right-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur px-4 py-3 pb-[max(env(safe-area-inset-bottom),0px)]">
+        <div class="mx-auto flex max-w-5xl items-center gap-3">
+            <div class="hidden sm:flex items-center text-sm text-slate-600" id="progress-counter">
+                <i class="fa-solid fa-list-check mr-2"></i>
+                <span><b data-count-done>0</b>/<b data-count-total>0</b> gereed</span>
+            </div>
+
+            <button type="button" id="open-action-modal"
+                class="ml-auto hidden rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring focus:ring-slate-200">
+                Handtekening & verzenden
+            </button>
+
+            <button type="submit" form="report-progress-form" id="save-report-btn"
+                class="rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                disabled>
+                Opslaan
+            </button>
+        </div>
+    </div>
 
     {{-- Sidebar --}}
     @include('sidebar')
@@ -302,7 +296,7 @@
             const zoneMap = {};
             let pendingHasItems = true;
 
-            // knoppen en velden
+            // UI refs
             const saveBtn = document.getElementById("save-report-btn");
             const sendBtn = document.getElementById("send-report-btn");
             const openActionBtn = document.getElementById("open-action-modal");
@@ -315,9 +309,12 @@
             const clearSignatureBtn = document.getElementById("signature-clear");
             const countDone = document.querySelector('[data-count-done]');
             const countTotal = document.querySelector('[data-count-total]');
+            const pdfToggleBtn = document.querySelector('[data-pdf-toggle]');
+            const pdfDropdown = document.querySelector('[data-pdf-dropdown]');
+            const pdfMenu = document.querySelector('[data-pdf-menu]');
             let signatureDirty = false;
 
-            // zones opslaan
+            // zones init
             dropzones.forEach(zone => {
                 const key = zone.dataset.dropzone;
                 zoneMap[key] = zone;
@@ -338,7 +335,7 @@
                 });
             });
 
-            // items initialiseren
+            // items init
             const items = form.querySelectorAll('[data-check-item]');
             if (countTotal) countTotal.textContent = items.length;
             items.forEach(item => {
@@ -424,8 +421,8 @@
             function updateActionButtons() {
                 const disabledSave = pendingHasItems;
                 const disabledSend = pendingHasItems || !signatureDirty;
-                [saveBtn].forEach(b => b && (b.disabled = disabledSave));
-                [sendBtn].forEach(b => b && (b.disabled = disabledSend));
+                if (saveBtn) saveBtn.disabled = disabledSave;
+                if (sendBtn) sendBtn.disabled = disabledSend;
                 warning?.classList.toggle('hidden', !pendingHasItems);
                 openActionBtn?.classList.toggle('hidden', pendingHasItems);
             }
@@ -435,8 +432,9 @@
                 if (countDone) countDone.textContent = done;
             }
 
-            // handtekening
+            // Signature pad
             initSignaturePad();
+            initPdfDropdown();
 
             function initSignaturePad() {
                 if (!signatureCanvas || !signatureInput) return;
@@ -447,6 +445,7 @@
                 ctx.fillStyle = '#fff';
                 ctx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
                 let drawing = false;
+
                 const get = (e) => {
                     const r = signatureCanvas.getBoundingClientRect();
                     const p = e.touches ? e.touches[0] : e;
@@ -482,6 +481,7 @@
                     drawing = false;
                     ctx.beginPath();
                 };
+
                 signatureCanvas.addEventListener('mousedown', start);
                 signatureCanvas.addEventListener('mousemove', draw);
                 window.addEventListener('mouseup', stop);
@@ -492,12 +492,14 @@
                     passive: false
                 });
                 window.addEventListener('touchend', stop);
+
                 clearSignatureBtn?.addEventListener('click', () => {
                     ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
                     ctx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
                     signatureDirty = false;
                     updateActionButtons();
                 });
+
                 sendBtn?.addEventListener('click', e => {
                     if (sendBtn.disabled) {
                         e.preventDefault();
@@ -508,7 +510,7 @@
                 });
             }
 
-            // modal open/sluit
+            // Modal open/sluit
             if (openActionBtn && actionModal) {
                 openActionBtn.addEventListener('click', () => {
                     actionModal.classList.remove('hidden');
@@ -525,9 +527,23 @@
                     }
                 });
             }
+
+            function initPdfDropdown() {
+                if (!pdfToggleBtn || !pdfDropdown || !pdfMenu) return;
+
+                pdfToggleBtn.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    pdfDropdown.classList.toggle('hidden');
+                });
+
+                document.addEventListener('click', (event) => {
+                    if (!pdfMenu.contains(event.target)) {
+                        pdfDropdown.classList.add('hidden');
+                    }
+                });
+            }
         }
     </script>
-
 </body>
 
 </html>

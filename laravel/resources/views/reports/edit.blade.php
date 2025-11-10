@@ -16,7 +16,7 @@
     <div class="max-w-2xl mx-auto bg-white rounded-lg shadow p-8 mt-10">
         <h1 class="text-2xl font-semibold mb-6 text-sky-700">Rapportage bewerken</h1>
 
-        <form method="POST" action="{{ route('reports.update', $report) }}" class="space-y-6">
+        <form id="report-edit-form" method="POST" action="{{ route('reports.update', $report) }}" class="space-y-6 pb-32">
             @csrf
             @method('PUT')
 
@@ -111,19 +111,20 @@
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
-
-            {{-- Knoppen --}}
-            <div class="flex gap-3 pt-4">
-                <a href="{{ route('reports.index') }}"
-                    class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium transition">
-                    Annuleren
-                </a>
-                <button
-                    class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm transition">
-                    Wijzigingen opslaan
-                </button>
-            </div>
         </form>
+    </div>
+
+    <div class="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur">
+        <div class="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4 py-3">
+            <a href="{{ route('reports.index') }}"
+                class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium transition">
+                Annuleren
+            </a>
+            <button form="report-edit-form"
+                class="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm transition">
+                Wijzigingen opslaan
+            </button>
+        </div>
     </div>
 </body>
 

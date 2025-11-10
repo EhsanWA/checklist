@@ -157,11 +157,17 @@ class ReportController extends Controller
         $inspection = $report->inspectionList
             ?: InspectionList::with('categories.checks')->latest()->first();
 
+        $submittedPdfs = collect(Storage::disk('public')->files('reports'))
+            ->filter(fn ($path) => str_starts_with($path, "reports/report-{$report->id}-"))
+            ->sortDesc()
+            ->values();
+
         return view('reports.show', [
-            'report'      => $report,
-            'reports'     => $reports,
-            'inspection'  => $inspection,
-            'checkItems'  => $checkItems,
+            'report'        => $report,
+            'reports'       => $reports,
+            'inspection'    => $inspection,
+            'checkItems'    => $checkItems,
+            'submittedPdfs' => $submittedPdfs,
         ]);
     }
 
