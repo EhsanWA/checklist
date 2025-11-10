@@ -3,8 +3,35 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\InspectionList;
+use App\Models\ReportCheckItem;
 
 class Report extends Model
 {
-    protected $fillable = ['schip_naam', 'schip_nummer', 'schip_bouwjaar', 'monteur', 'description', 'status'];
+    protected $fillable = [
+        'schip_naam',
+        'schip_nummer',
+        'schip_bouwjaar',
+        'monteur',
+        'description',
+        'status',
+        'inspection_list_id',
+        'signature_path',
+        'submitted_pdf_path',
+        'submitted_at',
+    ];
+
+    protected $casts = [
+        'submitted_at' => 'datetime',
+    ];
+
+    public function inspectionList()
+    {
+        return $this->belongsTo(InspectionList::class, 'inspection_list_id');
+    }
+
+    public function checkItems()
+    {
+        return $this->hasMany(ReportCheckItem::class);
+    }
 }

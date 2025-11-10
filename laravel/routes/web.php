@@ -39,6 +39,11 @@ Route::resource('reports', ReportController::class)
     ->only(['show'])
     ->whereNumber('report'); // voorkom conflict met 'create', 'edit', etc.
 
+Route::post('/reports/{report}/progress', [ReportController::class, 'saveProgress'])
+    ->name('reports.progress');
+Route::post('/reports/{report}/submit', [ReportController::class, 'submit'])
+    ->name('reports.submit');
+
 
 
 Route::middleware(['admin.pin'])->group(function () {
