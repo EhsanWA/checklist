@@ -1,5 +1,6 @@
 @php
     use Illuminate\Support\Facades\Storage;
+    use Illuminate\Support\Str;
 @endphp
 
 @if ($report->inspectionList && $report->inspectionList->categories->count())
@@ -24,10 +25,19 @@
                     'gecontroleerd' => ['label' => 'Gereed', 'hint' => 'Afgevinkt'],
                     'bijzonderheden' => ['label' => 'Bijzonder', 'hint' => 'Notitie/foto'],
                 ];
+                $searchIndex = Str::of(
+                    implode(' ', [
+                        $category->name,
+                        $check->label ?? '',
+                        $check->code ?? '',
+                        $check->severity ?? '',
+                    ])
+                )->lower()->squish();
             @endphp
 
             <article class="mb-4 space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm last:mb-0"
-                data-check-item="check-{{ $check->id }}" data-status="{{ $currentStatus }}" tabindex="0">
+                data-check-item="check-{{ $check->id }}" data-status="{{ $currentStatus }}" tabindex="0"
+                data-search-index="{{ $searchIndex }}">
                 <input type="hidden" name="checks[{{ $check->id }}][status]" value="{{ $currentStatus }}"
                     data-status-field>
 
