@@ -7,7 +7,7 @@
     <title>Report Manager</title>
     @vite('resources/css/app.css')
     {{-- Font Awesome voor icoontjes --}}
-    <script src="https://kit.fontawesome.com/a2e0a4c3c1.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/21e98e6012.js" crossorigin="anonymous"></script>
 </head>
 
 <body class="bg-gray-50 text-gray-900">

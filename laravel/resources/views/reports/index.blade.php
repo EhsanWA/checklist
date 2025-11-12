@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rapportages</title>
     @vite('resources/css/app.css')
-    <script src="https://kit.fontawesome.com/a2e0a4c3c1.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/21e98e6012.js" crossorigin="anonymous"></script>
 </head>
 
 <body class="bg-gray-50 text-gray-900">
@@ -116,59 +116,59 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
                         @forelse($reports as $report)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div class="font-medium">
-                                        <a href="{{ route('reports.show', $report) }}" class="hover:underline">
-                                            {{ $report->schip_naam ?? '—' }}
-                                        </a>
-                                    </div>
-                                    @if (!empty($report->description))
-                                        <div class="text-gray-500 text-sm line-clamp-2">
-                                            {{ \Illuminate\Support\Str::limit($report->description, 120) }}
-                                        </div>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 text-gray-700">{{ $report->schip_nummer ?? '—' }}</td>
-                                <td class="px-6 py-4 text-gray-700">{{ $report->schip_bouwjaar ?? '—' }}</td>
-                                <td class="px-6 py-4 text-gray-700">{{ $report->monteur ?? '—' }}</td>
-                                <td class="px-6 py-4">
-                                    @php
-                                        $status = $report->status ?? '';
-                                        $badge = match ($status) {
-                                            'draft' => 'bg-yellow-50 text-yellow-800 ring-yellow-600/20',
-                                            'submitted' => 'bg-sky-50 text-sky-800 ring-sky-600/20',
-                                            'archived' => 'bg-gray-100 text-gray-800 ring-gray-500/20',
-                                            default => 'bg-gray-50 text-gray-700 ring-gray-600/10',
-                                        };
-                                        $label =
-                                            [
-                                                'draft' => 'Concept',
-                                                'submitted' => 'Ingediend',
-                                                'archived' => 'Archief',
-                                            ][$status] ?? ucfirst($status ?: '—');
-                                    @endphp
-                                    <span
-                                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 {{ $badge }}">
-                                        {{ $label }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-gray-700">
-                                    {{ optional($report->created_at)->format('d-m-Y H:i') ?? '—' }}
-                                </td>
-                                <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('reports.show', $report) }}"
-                                        class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100">
-                                        Bekijken
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4">
+                                <div class="font-medium">
+                                    <a href="{{ route('reports.show', $report) }}" class="hover:underline">
+                                        {{ $report->schip_naam ?? '—' }}
                                     </a>
-                                </td>
-                            </tr>
+                                </div>
+                                @if (!empty($report->description))
+                                <div class="text-gray-500 text-sm line-clamp-2">
+                                    {{ \Illuminate\Support\Str::limit($report->description, 120) }}
+                                </div>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 text-gray-700">{{ $report->schip_nummer ?? '—' }}</td>
+                            <td class="px-6 py-4 text-gray-700">{{ $report->schip_bouwjaar ?? '—' }}</td>
+                            <td class="px-6 py-4 text-gray-700">{{ $report->monteur ?? '—' }}</td>
+                            <td class="px-6 py-4">
+                                @php
+                                $status = $report->status ?? '';
+                                $badge = match ($status) {
+                                'draft' => 'bg-yellow-50 text-yellow-800 ring-yellow-600/20',
+                                'submitted' => 'bg-sky-50 text-sky-800 ring-sky-600/20',
+                                'archived' => 'bg-gray-100 text-gray-800 ring-gray-500/20',
+                                default => 'bg-gray-50 text-gray-700 ring-gray-600/10',
+                                };
+                                $label =
+                                [
+                                'draft' => 'Concept',
+                                'submitted' => 'Ingediend',
+                                'archived' => 'Archief',
+                                ][$status] ?? ucfirst($status ?: '—');
+                                @endphp
+                                <span
+                                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 {{ $badge }}">
+                                    {{ $label }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-700">
+                                {{ optional($report->created_at)->format('d-m-Y H:i') ?? '—' }}
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="{{ route('reports.show', $report) }}"
+                                    class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100">
+                                    Bekijken
+                                </a>
+                            </td>
+                        </tr>
                         @empty
-                            <tr>
-                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">
-                                    Geen rapportages gevonden met deze filters.
-                                </td>
-                            </tr>
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                                Geen rapportages gevonden met deze filters.
+                            </td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>
