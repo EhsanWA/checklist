@@ -90,11 +90,12 @@
             {{-- Koppel inspectielijst --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Inspectielijst (optioneel)
+                    Inspectielijst <span class="text-red-500">*</span>
                 </label>
-                <select name="inspection_list_id"
+                <select name="inspection_list_id" required
                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring focus:ring-sky-200 px-4 py-2">
-                    <option value="">— Geen —</option>
+                    <option value="" disabled {{ old('inspection_list_id') ? '' : 'selected' }}>Selecteer een inspectielijst
+                    </option>
                     @foreach ($inspections as $ins)
                         <option value="{{ $ins->id }}" @selected(old('inspection_list_id') == $ins->id)>
                             {{ $ins->title ?? 'Inspectie #' . $ins->id }}
