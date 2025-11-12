@@ -153,12 +153,16 @@
                     </div>
 
                     <div class="relative w-full md:w-64">
-                        <input type="search" id="checks-search" placeholder="Zoek check of code…"
+                        <input type="search" id="checks-search" placeholder="Zoek check of code..."
                             class="w-full rounded-full border border-slate-200 px-4 py-2.5 pr-9 text-sm text-slate-800 focus:border-sky-400 focus:ring focus:ring-sky-100" />
                         <i
                             class="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
                     </div>
                 </div>
+
+                <p class="mt-2 text-sm text-slate-500 hidden sm:text-right" data-search-empty-state>
+                    Geen checks gevonden voor deze zoekopdracht.
+                </p>
 
                 {{-- Checklist --}}
                 @if ($report->inspectionList)
@@ -312,7 +316,10 @@
             const pdfToggleBtn = document.querySelector('[data-pdf-toggle]');
             const pdfDropdown = document.querySelector('[data-pdf-dropdown]');
             const pdfMenu = document.querySelector('[data-pdf-menu]');
+            const searchInput = document.getElementById("checks-search");
+            const searchEmptyState = document.querySelector('[data-search-empty-state]');
             let signatureDirty = false;
+            let currentSearchTerm = '';
 
             // zones init
             dropzones.forEach(zone => {
@@ -370,8 +377,33 @@
                 moveItem(item, item.dataset.status || 'pending');
             });
 
+            initSearch();
+
             updateCounters();
             updateActionButtons();
+
+            function initSearch() {
+                if (!items.length || !searchInput) return;
+                searchInput.addEventListener('input', () => {
+                    currentSearchTerm = searchInput.value.trim().toLowerCase();
+                    applySearchFilter();
+                });
+                applySearchFilter();
+            }
+
+            function applySearchFilter(options = {}) {
+                const { skipEmptyUpdate = false } = options;
+                let visibleCount = 0;
+                items.forEach(item => {
+                    const haystack = (item.dataset.searchIndex || item.textContent || '').toLowerCase();
+                    const match = !currentSearchTerm || haystack.includes(currentSearchTerm);
+                    item.toggleAttribute('hidden', !match);
+                    if (match) visibleCount++;
+                });
+                const showEmpty = currentSearchTerm.length > 0 && visibleCount === 0;
+                searchEmptyState?.classList.toggle('hidden', !showEmpty);
+                if (!skipEmptyUpdate) updateEmptyStates();
+            }
 
             function moveItem(item, targetKey) {
                 const zone = zoneMap[targetKey] ?? zoneMap.pending;
@@ -385,6 +417,11 @@
                 updateStatusButtons(item);
                 updateEmptyStates();
                 updateCounters();
+                if (searchInput) {
+                    applySearchFilter({
+                        skipEmptyUpdate: true
+                    });
+                }
             }
 
             function toggleDetails(item) {
@@ -410,7 +447,8 @@
 
             function updateEmptyStates() {
                 dropzones.forEach(zone => {
-                    const isEmpty = !zone.querySelector('[data-check-item]');
+                    const hasVisibleItems = zone.querySelector('[data-check-item]:not([hidden])');
+                    const isEmpty = !hasVisibleItems;
                     const helper = zone.querySelector('[data-empty-state]');
                     if (helper) helper.classList.toggle('hidden', !isEmpty);
                     if (zone.dataset.dropzone === 'pending') pendingHasItems = !isEmpty;
