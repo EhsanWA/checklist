@@ -400,6 +400,7 @@ class ReportController extends Controller
                     'code' => $check->code,
                     'notes' => $item->notes,
                     'photos' => $item->photos ?? [],
+                    'status' => $item->status,
                 ];
             }
         }
