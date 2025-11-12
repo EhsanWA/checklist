@@ -245,7 +245,7 @@
 
     <!-- Sticky actiebar onderin - OUTSIDE the form -->
     <div id="sticky-actions"
-        class="fixed left-0 right-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur px-4 py-3 pb-[max(env(safe-area-inset-bottom),0px)]">
+        class="fixed left-0 right-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
         <div class="mx-auto flex max-w-5xl items-center gap-3">
             <div class="hidden sm:flex items-center text-sm text-slate-600" id="progress-counter">
                 <i class="fa-solid fa-list-check mr-2"></i>
