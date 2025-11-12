@@ -65,19 +65,30 @@
         <p><strong>Verzonden op:</strong> {{ optional($report->submitted_at)->format('d-m-Y H:i') ?? now()->format('d-m-Y H:i') }}</p>
     </div>
 
-    @if (!empty($groupedChecks['gecontroleerd']))
+    @php
+        $completedChecks = collect($groupedChecks['gecontroleerd'] ?? []);
+        if (!empty($groupedChecks['bijzonderheden'])) {
+            $completedChecks = $completedChecks->merge($groupedChecks['bijzonderheden']);
+        }
+    @endphp
+
+    @if ($completedChecks->isNotEmpty())
         <h2>Gecontroleerd</h2>
         <table>
             <thead>
                 <tr>
+                    <th style="width: 10%;">Status</th>
                     <th style="width: 25%;">Categorie</th>
-                    <th style="width: 55%;">Controle</th>
+                    <th style="width: 45%;">Controle</th>
                     <th style="width: 20%;">Code</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($groupedChecks['gecontroleerd'] as $check)
+                @foreach ($completedChecks as $check)
                     <tr>
+                        <td style="text-align: center;">
+                            {{ ($check['status'] ?? 'gecontroleerd') === 'bijzonderheden' ? 'X' : 'V' }}
+                        </td>
                         <td>{{ $check['category'] }}</td>
                         <td>{{ $check['label'] }}</td>
                         <td class="muted">{{ $check['code'] ?? '-' }}</td>
