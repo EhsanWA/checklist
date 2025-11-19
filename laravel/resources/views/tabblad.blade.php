@@ -41,7 +41,6 @@
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                     <h2 class="text-2xl font-semibold text-slate-800">Gecontroleerd</h2>
-                    <p class="text-sm text-slate-500">Sleep checks hierheen of gebruik de V-knop.</p>
                 </div>
                 <div class="checklist-dropzone min-h-[240px] rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/60 p-4 transition"
                     data-dropzone="gecontroleerd">
@@ -86,7 +85,7 @@
                     <div>
                         <h2 class="text-2xl font-semibold text-slate-800">Opdrachten</h2>
                         <p class="text-sm text-slate-500">
-                            Gebruik de V- of X-knop of tik om de status te wisselen. Sleep is optioneel.
+                            Tik om de status te wisselen.
                         </p>
                     </div>
 
@@ -188,7 +187,6 @@
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                     <h2 class="text-2xl font-semibold text-slate-800">Bijzonderheden</h2>
-                    <p class="text-sm text-slate-500">Sleep checks hierheen of gebruik de X-knop.</p>
                 </div>
                 <div class="checklist-dropzone min-h-[240px] rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/60 p-4 transition"
                     data-dropzone="bijzonderheden">
@@ -205,7 +203,7 @@
                         <h2 class="text-xl font-semibold text-slate-900">Rapportage afronden</h2>
                         <p class="text-sm text-slate-500">Teken en verstuur de rapportage.</p>
                         <p data-open-warning class="mt-2 text-sm font-medium text-amber-600">
-                            Sleep alle controles naar Gecontroleerd of Bijzonderheden voordat je verstuurt.
+                            Tik alle controles aan om ze te markeren als Gecontroleerd of Bijzonderheden voordat je verstuurt.
                         </p>
                     </div>
                     <button type="button" id="close-action-modal"
