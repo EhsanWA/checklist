@@ -54,26 +54,8 @@
                                     <i class="fa-solid fa-hashtag text-[10px]"></i> {{ $check->code }}
                                 </span>
                             @endif
-                            @if ($check->severity)
-                                <span
-                                    class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold {{ $badgeClass }}">
-                                    <i class="fa-solid fa-bolt text-[10px]"></i> {{ ucfirst($check->severity) }}
-                                </span>
-                            @endif
-                            @if ($check->required)
-                                <span
-                                    class="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2 py-0.5 text-xs font-semibold text-sky-700">
-                                    <i class="fa-solid fa-circle-exclamation text-[10px]"></i> Verplicht
-                                </span>
-                            @endif
                         </div>
                     </div>
-
-                    <span
-                        class="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                        <i class="fa-solid fa-hand-pointer text-slate-400"></i>
-                        Tik of sleep om te verplaatsen
-                    </span>
                 </div>
 
                 {{-- Snelle status (grote touch targets) --}}
@@ -85,12 +67,6 @@
                             <span class="block">{{ $meta['label'] }}</span>
                         </button>
                     @endforeach
-
-                    <button type="button"
-                        class="ml-auto inline-flex items-center gap-1 rounded-full bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600"
-                        data-cycle-status>
-                        <i class="fa-solid fa-rotate-right"></i> Tik om te wisselen
-                    </button>
                 </div>
 
                 {{-- Details (notes + foto) --}}
