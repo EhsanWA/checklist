@@ -41,7 +41,6 @@
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                     <h2 class="text-2xl font-semibold text-slate-800">Gecontroleerd</h2>
-                    <p class="text-sm text-slate-500">Sleep checks hierheen of gebruik de V-knop.</p>
                 </div>
                 <div class="checklist-dropzone min-h-[240px] rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/60 p-4 transition"
                     data-dropzone="gecontroleerd">
@@ -86,7 +85,7 @@
                     <div>
                         <h2 class="text-2xl font-semibold text-slate-800">Opdrachten</h2>
                         <p class="text-sm text-slate-500">
-                            Gebruik de V- of X-knop of tik om de status te wisselen. Sleep is optioneel.
+                            Tik om de status te wisselen.
                         </p>
                     </div>
 
@@ -188,7 +187,6 @@
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                     <h2 class="text-2xl font-semibold text-slate-800">Bijzonderheden</h2>
-                    <p class="text-sm text-slate-500">Sleep checks hierheen of gebruik de X-knop.</p>
                 </div>
                 <div class="checklist-dropzone min-h-[240px] rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/60 p-4 transition"
                     data-dropzone="bijzonderheden">
@@ -205,7 +203,7 @@
                         <h2 class="text-xl font-semibold text-slate-900">Rapportage afronden</h2>
                         <p class="text-sm text-slate-500">Teken en verstuur de rapportage.</p>
                         <p data-open-warning class="mt-2 text-sm font-medium text-amber-600">
-                            Sleep alle controles naar Gecontroleerd of Bijzonderheden voordat je verstuurt.
+                            Tik alle controles aan om ze te markeren als Gecontroleerd of Bijzonderheden voordat je verstuurt.
                         </p>
                     </div>
                     <button type="button" id="close-action-modal"
@@ -269,319 +267,289 @@
     @include('sidebar')
 
     <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById("sidebar");
-            sidebar.classList.toggle("translate-x-full");
-            sidebar.classList.toggle("translate-x-0");
+function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    sidebar.classList.toggle("translate-x-full");
+    sidebar.classList.toggle("translate-x-0");
+}
+
+function switchTab(tabIndex) {
+    document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
+    document.querySelectorAll(".tab-btn").forEach(el => {
+        el.classList.remove("bg-sky-500", "text-white");
+        el.classList.add("bg-gray-200", "text-gray-800");
+    });
+
+    document.getElementById(`tab${tabIndex}-content`).classList.remove("hidden");
+    const activeBtn = document.getElementById(`tab${tabIndex}-btn`);
+    if (activeBtn) {
+        activeBtn.classList.add("bg-sky-500", "text-white");
+        activeBtn.classList.remove("bg-gray-200", "text-gray-800");
+    }
+}
+
+// Default tab
+switchTab(2);
+
+// Initialize Checklist Board
+initChecklistBoard();
+
+function initChecklistBoard() {
+    const form = document.getElementById("report-progress-form");
+    if (!form) return;
+
+    const dropzones = form.querySelectorAll("[data-dropzone]");
+    const zoneMap = {};
+    let pendingHasItems = true;
+
+    // UI elements
+    const saveBtn = document.getElementById("save-report-btn");
+    const sendBtn = document.getElementById("send-report-btn");
+    const openActionBtn = document.getElementById("open-action-modal");
+    const closeActionBtn = document.getElementById("close-action-modal");
+    const actionModal = document.getElementById("action-modal");
+    const warning = document.querySelector("[data-open-warning]");
+    const signatureCanvas = document.getElementById("signature-pad");
+    const signatureInput = document.getElementById("signature-input");
+    const signatureWarning = document.querySelector("[data-signature-warning]");
+    const clearSignatureBtn = document.getElementById("signature-clear");
+    const countDone = document.querySelector("[data-count-done]");
+    const countTotal = document.querySelector("[data-count-total]");
+    const pdfToggleBtn = document.querySelector("[data-pdf-toggle]");
+    const pdfDropdown = document.querySelector("[data-pdf-dropdown]");
+    const pdfMenu = document.querySelector("[data-pdf-menu]");
+    const searchInput = document.getElementById("checks-search");
+    const searchEmptyState = document.querySelector("[data-search-empty-state]");
+    let signatureDirty = false;
+    let currentSearchTerm = "";
+
+    // Initialize dropzones (but no drag events anymore)
+    dropzones.forEach(zone => {
+        zoneMap[zone.dataset.dropzone] = zone;
+    });
+
+    const items = form.querySelectorAll("[data-check-item]");
+    if (countTotal) countTotal.textContent = items.length;
+
+    // Initialize items
+    items.forEach(item => {
+        // Ensure drag is disabled
+        item.removeAttribute("draggable");
+        item.draggable = false;
+
+        // Status buttons
+        item.querySelectorAll("[data-status-option]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const target = btn.dataset.statusOption;
+                moveItem(item, target);
+                zoneMap[target]?.scrollIntoView({ behavior: "smooth", block: "center" });
+            });
+        });
+
+        // Cycle button (optional)
+        const cycleBtn = item.querySelector("[data-cycle-status]");
+        if (cycleBtn) {
+            cycleBtn.addEventListener("click", () => {
+                const order = ["pending", "gecontroleerd", "bijzonderheden"];
+                const cur = item.dataset.status || "pending";
+                const next = order[(order.indexOf(cur) + 1) % order.length];
+                moveItem(item, next);
+            });
         }
 
-        function switchTab(tabIndex) {
-            document.querySelectorAll(".tab-content").forEach((el) => el.classList.add("hidden"));
-            document.querySelectorAll(".tab-btn").forEach((el) => {
-                el.classList.remove("bg-sky-500", "text-white");
-                el.classList.add("bg-gray-200", "text-gray-800");
-            });
-            document.getElementById(`tab${tabIndex}-content`).classList.remove("hidden");
-            const activeBtn = document.getElementById(`tab${tabIndex}-btn`);
-            if (activeBtn) {
-                activeBtn.classList.add("bg-sky-500", "text-white");
-                activeBtn.classList.remove("bg-gray-200", "text-gray-800");
-            }
-        }
+        // Move to initial zone
+        moveItem(item, item.dataset.status || "pending");
+    });
 
-        switchTab(2);
-        initChecklistBoard();
+    initSearch();
+    updateCounters();
+    updateActionButtons();
 
-        function initChecklistBoard() {
-            const form = document.getElementById("report-progress-form");
-            if (!form) return;
+    // SEARCH
+    function initSearch() {
+        if (!items.length || !searchInput) return;
 
-            const dropzones = form.querySelectorAll('[data-dropzone]');
-            const zoneMap = {};
-            let pendingHasItems = true;
+        searchInput.addEventListener("input", () => {
+            currentSearchTerm = searchInput.value.trim().toLowerCase();
+            applySearchFilter();
+        });
 
-            // UI refs
-            const saveBtn = document.getElementById("save-report-btn");
-            const sendBtn = document.getElementById("send-report-btn");
-            const openActionBtn = document.getElementById("open-action-modal");
-            const closeActionBtn = document.getElementById("close-action-modal");
-            const actionModal = document.getElementById("action-modal");
-            const warning = document.querySelector('[data-open-warning]');
-            const signatureCanvas = document.getElementById("signature-pad");
-            const signatureInput = document.getElementById("signature-input");
-            const signatureWarning = document.querySelector('[data-signature-warning]');
-            const clearSignatureBtn = document.getElementById("signature-clear");
-            const countDone = document.querySelector('[data-count-done]');
-            const countTotal = document.querySelector('[data-count-total]');
-            const pdfToggleBtn = document.querySelector('[data-pdf-toggle]');
-            const pdfDropdown = document.querySelector('[data-pdf-dropdown]');
-            const pdfMenu = document.querySelector('[data-pdf-menu]');
-            const searchInput = document.getElementById("checks-search");
-            const searchEmptyState = document.querySelector('[data-search-empty-state]');
-            let signatureDirty = false;
-            let currentSearchTerm = '';
+        applySearchFilter();
+    }
 
-            // zones init
-            dropzones.forEach(zone => {
-                const key = zone.dataset.dropzone;
-                zoneMap[key] = zone;
-                zone.addEventListener('dragover', e => {
-                    e.preventDefault();
-                    zone.classList.add('border-sky-300', 'bg-white');
-                });
-                zone.addEventListener('dragleave', e => {
-                    if (e.currentTarget.contains(e.relatedTarget)) return;
-                    zone.classList.remove('border-sky-300', 'bg-white');
-                });
-                zone.addEventListener('drop', e => {
-                    e.preventDefault();
-                    zone.classList.remove('border-sky-300', 'bg-white');
-                    const itemId = e.dataTransfer.getData('text/plain');
-                    const item = form.querySelector(`[data-check-item="${itemId}"]`);
-                    if (item) moveItem(item, key);
-                });
-            });
+    function applySearchFilter() {
+        let visibleCount = 0;
 
-            // items init
-            const items = form.querySelectorAll('[data-check-item]');
-            if (countTotal) countTotal.textContent = items.length;
-            items.forEach(item => {
-                item.setAttribute('draggable', 'true');
-                item.addEventListener('dragstart', e => {
-                    e.dataTransfer.setData('text/plain', item.dataset.checkItem);
-                    item.classList.add('opacity-60');
-                });
-                item.addEventListener('dragend', () => item.classList.remove('opacity-60'));
+        items.forEach(item => {
+            const haystack = (item.dataset.searchIndex || item.textContent || "").toLowerCase();
+            const match = !currentSearchTerm || haystack.includes(currentSearchTerm);
+            item.toggleAttribute("hidden", !match);
+            if (match) visibleCount++;
+        });
 
-                item.querySelectorAll('[data-status-option]').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const target = btn.dataset.statusOption;
-                        moveItem(item, target);
-                        zoneMap[target]?.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
-                    });
-                });
+        const showEmpty = currentSearchTerm.length > 0 && visibleCount === 0;
+        searchEmptyState?.classList.toggle("hidden", !showEmpty);
 
-                const cycleBtn = item.querySelector('[data-cycle-status]');
-                if (cycleBtn) {
-                    cycleBtn.addEventListener('click', () => {
-                        const order = ['pending', 'gecontroleerd', 'bijzonderheden'];
-                        const cur = item.dataset.status || 'pending';
-                        const next = order[(order.indexOf(cur) + 1) % order.length];
-                        moveItem(item, next);
-                    });
-                }
+        updateEmptyStates();
+    }
 
-                moveItem(item, item.dataset.status || 'pending');
-            });
+    // MOVE ITEM
+    function moveItem(item, targetKey) {
+        const zone = zoneMap[targetKey] ?? zoneMap.pending;
+        if (!zone) return;
 
-            initSearch();
+        zone.appendChild(item);
+        item.dataset.status = targetKey;
 
-            updateCounters();
+        const statusInput = item.querySelector("[data-status-field]");
+        if (statusInput) statusInput.value = targetKey;
+
+        toggleDetails(item);
+        updateStatusButtons(item);
+        updateEmptyStates();
+        updateCounters();
+    }
+
+    function toggleDetails(item) {
+        const wrap = item.querySelector("[data-note-wrapper]");
+        const note = item.querySelector("[data-note-field]");
+        const photo = item.querySelector("[data-photo-field]");
+        const show = item.dataset.status === "bijzonderheden";
+
+        if (wrap) wrap.classList.toggle("hidden", !show);
+        if (note) note.disabled = !show;
+        if (photo) photo.disabled = !show;
+    }
+
+    function updateStatusButtons(item) {
+        const cur = item.dataset.status;
+        item.querySelectorAll("[data-status-option]").forEach(btn => {
+            const active = btn.dataset.statusOption === cur;
+            btn.classList.toggle("border-sky-500", active);
+            btn.classList.toggle("bg-sky-50", active);
+            btn.classList.toggle("text-sky-900", active);
+            btn.classList.toggle("shadow", active);
+        });
+    }
+
+    function updateEmptyStates() {
+        dropzones.forEach(zone => {
+            const hasVisibleItems = zone.querySelector("[data-check-item]:not([hidden])");
+            const isEmpty = !hasVisibleItems;
+            const helper = zone.querySelector("[data-empty-state]");
+            if (helper) helper.classList.toggle("hidden", !isEmpty);
+            if (zone.dataset.dropzone === "pending") pendingHasItems = !isEmpty;
+        });
+        updateActionButtons();
+    }
+
+    function updateCounters() {
+        const done = form.querySelectorAll('[data-check-item][data-status="gecontroleerd"]').length;
+        if (countDone) countDone.textContent = done;
+    }
+
+    function updateActionButtons() {
+        const disabledSave = pendingHasItems;
+        const disabledSend = pendingHasItems || !signatureDirty;
+
+        if (saveBtn) saveBtn.disabled = disabledSave;
+        if (sendBtn) sendBtn.disabled = disabledSend;
+
+        warning?.classList.toggle("hidden", !pendingHasItems);
+        openActionBtn?.classList.toggle("hidden", pendingHasItems);
+    }
+
+    // SIGNATURE PAD
+    initSignaturePad();
+
+    function initSignaturePad() {
+        if (!signatureCanvas || !signatureInput) return;
+
+        const ctx = signatureCanvas.getContext("2d");
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#0f172a";
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+
+        let drawing = false;
+
+        const get = e => {
+            const r = signatureCanvas.getBoundingClientRect();
+            const p = e.touches ? e.touches[0] : e;
+            return {
+                x: (p.clientX - r.left) * (signatureCanvas.width / r.width),
+                y: (p.clientY - r.top) * (signatureCanvas.height / r.height)
+            };
+        };
+
+        const start = e => {
+            drawing = true;
+            const { x, y } = get(e);
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            e.preventDefault();
+        };
+
+        const draw = e => {
+            if (!drawing) return;
+            const { x, y } = get(e);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            signatureDirty = true;
+            signatureWarning?.classList.add("hidden");
             updateActionButtons();
+            e.preventDefault();
+        };
 
-            function initSearch() {
-                if (!items.length || !searchInput) return;
-                searchInput.addEventListener('input', () => {
-                    currentSearchTerm = searchInput.value.trim().toLowerCase();
-                    applySearchFilter();
-                });
-                applySearchFilter();
+        const stop = () => {
+            drawing = false;
+            ctx.beginPath();
+        };
+
+        signatureCanvas.addEventListener("mousedown", start);
+        signatureCanvas.addEventListener("mousemove", draw);
+        window.addEventListener("mouseup", stop);
+        signatureCanvas.addEventListener("touchstart", start, { passive: false });
+        signatureCanvas.addEventListener("touchmove", draw, { passive: false });
+        window.addEventListener("touchend", stop);
+
+        clearSignatureBtn?.addEventListener("click", () => {
+            ctx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            signatureDirty = false;
+            updateActionButtons();
+        });
+
+        sendBtn?.addEventListener("click", e => {
+            if (sendBtn.disabled) {
+                e.preventDefault();
+                if (!signatureDirty) signatureWarning?.classList.remove("hidden");
+                return;
             }
+            signatureInput.value = signatureCanvas.toDataURL("image/png");
+        });
+    }
 
-            function applySearchFilter(options = {}) {
-                const { skipEmptyUpdate = false } = options;
-                let visibleCount = 0;
-                items.forEach(item => {
-                    const haystack = (item.dataset.searchIndex || item.textContent || '').toLowerCase();
-                    const match = !currentSearchTerm || haystack.includes(currentSearchTerm);
-                    item.toggleAttribute('hidden', !match);
-                    if (match) visibleCount++;
-                });
-                const showEmpty = currentSearchTerm.length > 0 && visibleCount === 0;
-                searchEmptyState?.classList.toggle('hidden', !showEmpty);
-                if (!skipEmptyUpdate) updateEmptyStates();
+    // PDF MENU
+    initPdfDropdown();
+
+    function initPdfDropdown() {
+        if (!pdfToggleBtn || !pdfDropdown || !pdfMenu) return;
+
+        pdfToggleBtn.addEventListener("click", event => {
+            event.stopPropagation();
+            pdfDropdown.classList.toggle("hidden");
+        });
+
+        document.addEventListener("click", event => {
+            if (!pdfMenu.contains(event.target)) {
+                pdfDropdown.classList.add("hidden");
             }
+        });
+    }
+}
+</script>
 
-            function moveItem(item, targetKey) {
-                const zone = zoneMap[targetKey] ?? zoneMap.pending;
-                if (!zone) return;
-                zone.appendChild(item);
-                item.dataset.status = targetKey;
-                const statusInput = item.querySelector('[data-status-field]');
-                if (statusInput) statusInput.value = targetKey;
-
-                toggleDetails(item);
-                updateStatusButtons(item);
-                updateEmptyStates();
-                updateCounters();
-                if (searchInput) {
-                    applySearchFilter({
-                        skipEmptyUpdate: true
-                    });
-                }
-            }
-
-            function toggleDetails(item) {
-                const wrap = item.querySelector('[data-note-wrapper]');
-                const note = item.querySelector('[data-note-field]');
-                const photo = item.querySelector('[data-photo-field]');
-                const show = item.dataset.status === 'bijzonderheden';
-                if (wrap) wrap.classList.toggle('hidden', !show);
-                if (note) note.disabled = !show;
-                if (photo) photo.disabled = !show;
-            }
-
-            function updateStatusButtons(item) {
-                const cur = item.dataset.status;
-                item.querySelectorAll('[data-status-option]').forEach(btn => {
-                    const active = btn.dataset.statusOption === cur;
-                    btn.classList.toggle('border-sky-500', active);
-                    btn.classList.toggle('bg-sky-50', active);
-                    btn.classList.toggle('text-sky-900', active);
-                    btn.classList.toggle('shadow', active);
-                });
-            }
-
-            function updateEmptyStates() {
-                dropzones.forEach(zone => {
-                    const hasVisibleItems = zone.querySelector('[data-check-item]:not([hidden])');
-                    const isEmpty = !hasVisibleItems;
-                    const helper = zone.querySelector('[data-empty-state]');
-                    if (helper) helper.classList.toggle('hidden', !isEmpty);
-                    if (zone.dataset.dropzone === 'pending') pendingHasItems = !isEmpty;
-                });
-                updateActionButtons();
-            }
-
-            function updateActionButtons() {
-                const disabledSave = pendingHasItems;
-                const disabledSend = pendingHasItems || !signatureDirty;
-                if (saveBtn) saveBtn.disabled = disabledSave;
-                if (sendBtn) sendBtn.disabled = disabledSend;
-                warning?.classList.toggle('hidden', !pendingHasItems);
-                openActionBtn?.classList.toggle('hidden', pendingHasItems);
-            }
-
-            function updateCounters() {
-                const done = form.querySelectorAll('[data-check-item][data-status="gecontroleerd"]').length;
-                if (countDone) countDone.textContent = done;
-            }
-
-            // Signature pad
-            initSignaturePad();
-            initPdfDropdown();
-
-            function initSignaturePad() {
-                if (!signatureCanvas || !signatureInput) return;
-                const ctx = signatureCanvas.getContext('2d');
-                ctx.lineWidth = 2;
-                ctx.lineCap = 'round';
-                ctx.strokeStyle = '#0f172a';
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
-                let drawing = false;
-
-                const get = (e) => {
-                    const r = signatureCanvas.getBoundingClientRect();
-                    const p = e.touches ? e.touches[0] : e;
-                    return {
-                        x: (p.clientX - r.left) * (signatureCanvas.width / r.width),
-                        y: (p.clientY - r.top) * (signatureCanvas.height / r.height)
-                    };
-                };
-                const start = e => {
-                    drawing = true;
-                    const {
-                        x,
-                        y
-                    } = get(e);
-                    ctx.beginPath();
-                    ctx.moveTo(x, y);
-                    e.preventDefault();
-                };
-                const draw = e => {
-                    if (!drawing) return;
-                    const {
-                        x,
-                        y
-                    } = get(e);
-                    ctx.lineTo(x, y);
-                    ctx.stroke();
-                    signatureDirty = true;
-                    signatureWarning?.classList.add('hidden');
-                    updateActionButtons();
-                    e.preventDefault();
-                };
-                const stop = () => {
-                    drawing = false;
-                    ctx.beginPath();
-                };
-
-                signatureCanvas.addEventListener('mousedown', start);
-                signatureCanvas.addEventListener('mousemove', draw);
-                window.addEventListener('mouseup', stop);
-                signatureCanvas.addEventListener('touchstart', start, {
-                    passive: false
-                });
-                signatureCanvas.addEventListener('touchmove', draw, {
-                    passive: false
-                });
-                window.addEventListener('touchend', stop);
-
-                clearSignatureBtn?.addEventListener('click', () => {
-                    ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
-                    ctx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
-                    signatureDirty = false;
-                    updateActionButtons();
-                });
-
-                sendBtn?.addEventListener('click', e => {
-                    if (sendBtn.disabled) {
-                        e.preventDefault();
-                        if (!signatureDirty) signatureWarning?.classList.remove('hidden');
-                        return;
-                    }
-                    signatureInput.value = signatureCanvas.toDataURL('image/png');
-                });
-            }
-
-            // Modal open/sluit
-            if (openActionBtn && actionModal) {
-                openActionBtn.addEventListener('click', () => {
-                    actionModal.classList.remove('hidden');
-                    document.body.classList.add('overflow-hidden');
-                });
-                closeActionBtn?.addEventListener('click', () => {
-                    actionModal.classList.add('hidden');
-                    document.body.classList.remove('overflow-hidden');
-                });
-                actionModal.addEventListener('click', e => {
-                    if (e.target === actionModal) {
-                        actionModal.classList.add('hidden');
-                        document.body.classList.remove('overflow-hidden');
-                    }
-                });
-            }
-
-            function initPdfDropdown() {
-                if (!pdfToggleBtn || !pdfDropdown || !pdfMenu) return;
-
-                pdfToggleBtn.addEventListener('click', (event) => {
-                    event.stopPropagation();
-                    pdfDropdown.classList.toggle('hidden');
-                });
-
-                document.addEventListener('click', (event) => {
-                    if (!pdfMenu.contains(event.target)) {
-                        pdfDropdown.classList.add('hidden');
-                    }
-                });
-            }
-        }
-    </script>
 </body>
 
 </html>
