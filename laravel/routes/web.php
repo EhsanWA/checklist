@@ -12,12 +12,14 @@ Route::get('/admin/login',  [AdminPinController::class, 'show'])->name('admin.lo
 Route::post('/admin/login', [AdminPinController::class, 'verify'])->name('admin.login.verify');
 Route::post('/admin/logout', [AdminPinController::class, 'logout'])->name('admin.logout');
 
-// Beheer — achter PIN
-Route::get('/reports/beheer', [ReportController::class, 'beheer'])
-    ->middleware('admin.pin')
-    ->name('reports.beheer');
+Route::middleware('admin.pin')->group(function () {
+    Route::view('/admin/menu', 'admin.menu')->name('admin.menu');
+    Route::get('/reports/beheer', [ReportController::class, 'beheer'])->name('reports.beheer');
+    Route::get('/inspections/beheer', [InspectionListController::class, 'beheer'])->name('inspections.beheer');
+});
 
-Route::redirect('/beheer', '/reports/beheer');
+// Beheer – achter PIN
+Route::redirect('/beheer', '/admin/menu');
 
 // Publiek overzicht
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
@@ -49,6 +51,9 @@ Route::post('/reports/{report}/submit', [ReportController::class, 'submit'])
 Route::middleware(['admin.pin'])->group(function () {
     Route::get('/inspections/create', [InspectionListController::class, 'create'])->name('inspections.create');
     Route::post('/inspections', [InspectionListController::class, 'store'])->name('inspections.store');
+    Route::get('/inspections/{inspectionList}/edit', [InspectionListController::class, 'edit'])->name('inspections.edit');
+    Route::put('/inspections/{inspectionList}', [InspectionListController::class, 'update'])->name('inspections.update');
+    Route::delete('/inspections/{inspectionList}', [InspectionListController::class, 'destroy'])->name('inspections.destroy');
 
     // (optioneel later) edit/update
     Route::get('/inspections/{inspectionList}', [InspectionListController::class, 'show'])->name('inspections.show');

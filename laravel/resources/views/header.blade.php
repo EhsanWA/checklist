@@ -24,8 +24,8 @@
                 <i class="fa-solid fa-table-list"></i><span>Overzicht</span>
             </a>
             @if (session('is_admin') === true)
-                <a href="{{ route('reports.beheer') }}"
-                    class="{{ $link }} {{ $is('reports.beheer') ? $active : '' }}">
+                <a href="{{ route('admin.menu') }}"
+                    class="{{ $link }} {{ $is('admin.menu', 'reports.beheer', 'inspections.beheer') ? $active : '' }}">
                     <i class="fa-solid fa-shield-halved"></i><span>Beheer</span>
                 </a>
             @else

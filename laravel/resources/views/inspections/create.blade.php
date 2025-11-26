@@ -17,13 +17,41 @@
     {{-- Optioneel: jouw bestaande header --}}
     @includeIf('header')
 
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="inspectionBuilder()">
-        <a href="{{ route('reports.beheer') }}"
+    @php
+        $isEdit = isset($inspectionList);
+        $formAction = $isEdit ? route('inspections.update', $inspectionList) : route('inspections.store');
+        $initialForm = $isEdit
+            ? [
+                'title' => $inspectionList->title,
+                'description' => $inspectionList->description,
+                'categories' => $inspectionList->categories->map(function ($category) {
+                    return [
+                        'name' => $category->name,
+                        'sort' => $category->sort,
+                        'checks' => $category->checks->map(function ($check) {
+                            return [
+                                'label' => $check->label,
+                                'code' => $check->code,
+                                'required' => (bool) $check->required,
+                                'severity' => $check->severity,
+                                'sort' => $check->sort,
+                            ];
+                        })->values(),
+                    ];
+                })->values(),
+            ]
+            : null;
+    @endphp
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="inspectionBuilder(@json($initialForm))">
+        <a href="{{ route('inspections.beheer') }}"
             class="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4">
             <span aria-hidden="true">&larr;</span>
             Terug naar beheer
         </a>
-        <h1 class="text-2xl font-semibold mb-6">Nieuwe Inspectielijst</h1>
+        <h1 class="text-2xl font-semibold mb-6">
+            {{ $isEdit ? 'Inspectielijst bewerken' : 'Nieuwe Inspectielijst' }}
+        </h1>
 
         {{-- direct boven <form> --}}
         @if ($errors->any())
@@ -44,8 +72,11 @@
         @endif
 
 
-        <form method="POST" action="{{ route('inspections.store') }}">
+        <form method="POST" action="{{ $formAction }}">
             @csrf
+            @if ($isEdit)
+                @method('PUT')
+            @endif
 
             <div class="space-y-6">
                 <div>
@@ -150,7 +181,7 @@
                 <div class="pt-4">
                     <button type="submit"
                         class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-sky-600 text-white hover:bg-sky-700">
-                        Inspectielijst opslaan
+                        {{ $isEdit ? 'Inspectielijst bijwerken' : 'Inspectielijst opslaan' }}
                     </button>
                 </div>
             </div>
@@ -161,50 +192,63 @@
     @vite('resources/js/app.js')
 
     <script>
-        function inspectionBuilder() {
+        function inspectionBuilder(initial = null) {
             // Fallback voor oude browsers zonder crypto.randomUUID()
             const uuid = () => (crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2) + Date.now());
 
+            const createEmptyCheck = () => ({
+                key: uuid(),
+                label: '',
+                code: '',
+                required: true,
+                severity: 'info'
+            });
+
+            const createEmptyCategory = () => ({
+                key: uuid(),
+                name: '',
+                checks: [createEmptyCheck()]
+            });
+
+            const normalize = (payload) => {
+                const base = payload ?? {};
+                const categories = Array.isArray(base.categories) && base.categories.length
+                    ? base.categories
+                    : [createEmptyCategory()];
+
+                return {
+                    title: base.title ?? '',
+                    description: base.description ?? '',
+                    categories: categories.map((cat) => {
+                        const checks = Array.isArray(cat.checks) && cat.checks.length
+                            ? cat.checks
+                            : [createEmptyCheck()];
+
+                        return {
+                            key: uuid(),
+                            name: cat.name ?? '',
+                            checks: checks.map((chk) => ({
+                                key: uuid(),
+                                label: chk.label ?? '',
+                                code: chk.code ?? '',
+                                required: chk.required !== false,
+                                severity: chk.severity ?? 'info'
+                            }))
+                        };
+                    })
+                };
+            };
+
             return {
-                form: {
-                    title: '',
-                    description: '',
-                    categories: [{
-                        key: uuid(),
-                        name: '',
-                        checks: [{
-                            key: uuid(),
-                            label: '',
-                            code: '',
-                            required: true,
-                            severity: 'info'
-                        }]
-                    }]
-                },
+                form: normalize(initial),
                 addCategory() {
-                    this.form.categories.push({
-                        key: uuid(),
-                        name: '',
-                        checks: [{
-                            key: uuid(),
-                            label: '',
-                            code: '',
-                            required: true,
-                            severity: 'info'
-                        }]
-                    });
+                    this.form.categories.push(createEmptyCategory());
                 },
                 removeCategory(index) {
                     this.form.categories.splice(index, 1);
                 },
                 addCheck(ci) {
-                    this.form.categories[ci].checks.push({
-                        key: uuid(),
-                        label: '',
-                        code: '',
-                        required: true,
-                        severity: 'info'
-                    });
+                    this.form.categories[ci].checks.push(createEmptyCheck());
                 },
                 removeCheck(ci, ji) {
                     this.form.categories[ci].checks.splice(ji, 1);
