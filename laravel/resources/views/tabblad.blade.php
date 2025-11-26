@@ -530,6 +530,24 @@ function initChecklistBoard() {
         });
     }
 
+    // Modal open/sluit
+            if (openActionBtn && actionModal) {
+                openActionBtn.addEventListener('click', () => {
+                    actionModal.classList.remove('hidden');
+                    document.body.classList.add('overflow-hidden');
+                });
+                closeActionBtn?.addEventListener('click', () => {
+                    actionModal.classList.add('hidden');
+                    document.body.classList.remove('overflow-hidden');
+                });
+                actionModal.addEventListener('click', e => {
+                    if (e.target === actionModal) {
+                        actionModal.classList.add('hidden');
+                        document.body.classList.remove('overflow-hidden');
+                    }
+                });
+            }
+
     // PDF MENU
     initPdfDropdown();
 

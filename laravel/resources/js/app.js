@@ -153,10 +153,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
         return el;
     }
-
-    // No dragging logic needed anymore
-    // No dragover, dragleave, drop
-    // No draggable attributes
-
-    console.log("Dragging disabled — clean version loaded.");
 });
