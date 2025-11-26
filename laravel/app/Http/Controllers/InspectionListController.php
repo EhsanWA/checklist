@@ -119,10 +119,33 @@ class InspectionListController extends Controller
     {
         $inspectionList->load('categories.checks');
 
-        return view('inspections.create', [
-            'inspectionList' => $inspectionList,
-            'isEdit' => true,
-        ]);
+        $formState = [
+            'title' => $inspectionList->title,
+            'description' => $inspectionList->description,
+            'categories' => $inspectionList->categories
+                ->map(function ($category) {
+                    return [
+                        'name' => $category->name,
+                        'sort' => $category->sort,
+                        'checks' => $category->checks
+                            ->map(function ($check) {
+                                return [
+                                    'label' => $check->label,
+                                    'code' => $check->code,
+                                    'required' => (bool) $check->required,
+                                    'severity' => $check->severity,
+                                    'sort' => $check->sort,
+                                ];
+                            })
+                            ->values()
+                            ->toArray(),
+                    ];
+                })
+                ->values()
+                ->toArray(),
+        ];
+
+        return view('inspections.edit', compact('inspectionList', 'formState'));
     }
 
     public function update(Request $request, InspectionList $inspectionList)
