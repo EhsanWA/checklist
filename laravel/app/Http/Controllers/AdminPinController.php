@@ -22,7 +22,7 @@ class AdminPinController extends Controller
             $request->session()->put('is_admin', true);
 
             $intended = $request->session()->pull('intended_url');
-            return redirect()->to($intended ?? route('reports.beheer'))
+            return redirect()->to($intended ?? route('admin.menu'))
                 ->with('success', 'Toegang verleend.');
         }
 

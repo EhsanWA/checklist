@@ -23,10 +23,10 @@
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3">
-                <a href="{{ route('inspections.create') }}"
+                <a href="{{ route('inspections.beheer') }}"
                     class="inline-flex items-center gap-2 rounded-lg bg-green-600 text-white px-4 py-2 font-medium hover:green-sky-800 shadow transition w-full sm:w-auto justify-center">
                     <i class="fa-solid fa-plus"></i>
-                    <span>Inspectie lijst aanmaken</span>
+                    <span>Naar inspectie lijst</span>
                 </a>
 
                 <a href="{{ route('reports.create') }}"

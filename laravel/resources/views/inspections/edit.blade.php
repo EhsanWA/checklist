@@ -1,59 +1,28 @@
-{{-- resources/views/inspections/create.blade.php --}}
+{{-- resources/views/inspections/edit.blade.php --}}
 <!DOCTYPE html>
 <html lang="nl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nieuwe Inspectielijst</title>
+    <title>Inspectielijst bewerken</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite('resources/css/app.css')
-    {{-- Alpine.js (CDN) --}}
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
 <body class="bg-gray-50 text-gray-900 min-h-screen">
-
-    {{-- Optioneel: jouw bestaande header --}}
     @includeIf('header')
 
-    @php
-        $isEdit = isset($inspectionList);
-        $formAction = $isEdit ? route('inspections.update', $inspectionList) : route('inspections.store');
-        $initialForm = $isEdit
-            ? [
-                'title' => $inspectionList->title,
-                'description' => $inspectionList->description,
-                'categories' => $inspectionList->categories->map(function ($category) {
-                    return [
-                        'name' => $category->name,
-                        'sort' => $category->sort,
-                        'checks' => $category->checks->map(function ($check) {
-                            return [
-                                'label' => $check->label,
-                                'code' => $check->code,
-                                'required' => (bool) $check->required,
-                                'severity' => $check->severity,
-                                'sort' => $check->sort,
-                            ];
-                        })->values(),
-                    ];
-                })->values(),
-            ]
-            : null;
-    @endphp
-
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="inspectionBuilder(@json($initialForm))">
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+        x-data='inspectionBuilder(@json($formState ?? null))'>
         <a href="{{ route('inspections.beheer') }}"
             class="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4">
             <span aria-hidden="true">&larr;</span>
             Terug naar beheer
         </a>
-        <h1 class="text-2xl font-semibold mb-6">
-            {{ $isEdit ? 'Inspectielijst bewerken' : 'Nieuwe Inspectielijst' }}
-        </h1>
+        <h1 class="text-2xl font-semibold mb-6">Inspectielijst bewerken</h1>
 
-        {{-- direct boven <form> --}}
         @if ($errors->any())
             <div class="mb-4 rounded-lg bg-red-50 text-red-700 px-4 py-3">
                 <p class="font-semibold">Er ging iets mis:</p>
@@ -71,12 +40,9 @@
             </div>
         @endif
 
-
-        <form method="POST" action="{{ $formAction }}">
+        <form method="POST" action="{{ route('inspections.update', $inspectionList) }}">
             @csrf
-            @if ($isEdit)
-                @method('PUT')
-            @endif
+            @method('PUT')
 
             <div class="space-y-6">
                 <div>
@@ -101,7 +67,6 @@
                     @enderror
                 </div>
 
-                {{-- Categorieën --}}
                 <div class="flex items-center justify-between">
                     <h2 class="text-xl font-semibold">Categorieën</h2>
                     <button type="button" @click="addCategory()"
@@ -123,7 +88,6 @@
                             </button>
                         </div>
 
-                        {{-- Checks binnen categorie --}}
                         <div class="flex items-center justify-between">
                             <h3 class="font-medium">Checks</h3>
                             <button type="button" @click="addCheck(ci)"
@@ -133,8 +97,7 @@
                         <div class="space-y-3">
                             <template x-for="(chk, ji) in cat.checks" :key="chk.key">
                                 <div class="grid grid-cols-12 gap-3 items-start">
-                                    <input type="hidden" :name="`categories[${ci}][checks][${ji}][sort]`"
-                                        :value="ji">
+                                    <input type="hidden" :name="`categories[${ci}][checks][${ji}][sort]`" :value="ji">
 
                                     <div class="col-span-7">
                                         <input :name="`categories[${ci}][checks][${ji}][label]`" x-model="chk.label"
@@ -149,7 +112,6 @@
                                     </div>
 
                                     <div class="col-span-1 flex items-center gap-2">
-                                        {{-- stuur altijd een waarde mee --}}
                                         <input type="hidden" :name="`categories[${ci}][checks][${ji}][required]`"
                                             value="0">
                                         <input type="checkbox" :name="`categories[${ci}][checks][${ji}][required]`"
@@ -158,8 +120,7 @@
                                     </div>
 
                                     <div class="col-span-1">
-                                        <select :name="`categories[${ci}][checks][${ji}][severity]`"
-                                            x-model="chk.severity"
+                                        <select :name="`categories[${ci}][checks][${ji}][severity]`" x-model="chk.severity"
                                             class="w-full rounded-lg border-gray-300 px-2 py-2 text-sm">
                                             <option value="info">Info</option>
                                             <option value="low">Low</option>
@@ -180,20 +141,18 @@
 
                 <div class="pt-4">
                     <button type="submit"
-                        class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-sky-600 text-white hover:bg-sky-700">
-                        {{ $isEdit ? 'Inspectielijst bijwerken' : 'Inspectielijst opslaan' }}
+                        class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-green-600 text-white hover:bg-green-700">
+                        Inspectielijst opslaan
                     </button>
                 </div>
             </div>
         </form>
     </main>
 
-    {{-- App JS (als je Alpine/Turbo/Vite gebruikt) --}}
     @vite('resources/js/app.js')
 
     <script>
         function inspectionBuilder(initial = null) {
-            // Fallback voor oude browsers zonder crypto.randomUUID()
             const uuid = () => (crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2) + Date.now());
 
             const createEmptyCheck = () => ({
