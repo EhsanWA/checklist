@@ -263,9 +263,6 @@
         </div>
     </div>
 
-    {{-- Sidebar --}}
-    @include('sidebar')
-
     <script>
 function toggleSidebar() {
     const sidebar = document.getElementById("sidebar");

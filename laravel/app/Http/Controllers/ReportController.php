@@ -10,9 +10,18 @@ use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Mail\ReportSubmitted;
+use Illuminate\Support\Facades\Mail;
+use App\Services\ReportSubmissionService;
+
+
 
 class ReportController extends Controller
 {
+    /**
+     * Toont een overzicht van alle rapporten met filteropties.
+     * Gebruikt voor de publieke rapportage-index met zoek- en filterfunctionaliteit.
+     */
     public function index(Request $request)
     {
         $reports = Report::query()
@@ -44,6 +53,10 @@ class ReportController extends Controller
         ]);
     }
 
+    /**
+     * Beheerpagina voor rapporten (admin-only).
+     * Toont gefilterde lijst met statustabs, zoekfunctie en sorteermogelijkheden.
+     */
     public function beheer(Request $request)
     {
         $status  = $request->string('status', 'all')->toString();
@@ -112,6 +125,10 @@ class ReportController extends Controller
         return view('reports.beheer', compact('reports', 'counts', 'status', 'q', 'sort', 'perPage'));
     }
 
+    /**
+     * Toont het formulier om een nieuw rapport aan te maken.
+     * Laadt beschikbare inspectielijsten voor de dropdown-selectie.
+     */
     public function create()
     {
         // Voor de dropdown om te koppelen
@@ -121,6 +138,10 @@ class ReportController extends Controller
         return view('reports.create', compact('inspections'));
     }
 
+    /**
+     * Slaat een nieuw rapport op in de database.
+     * Valideert de invoer en maakt een nieuw Report model aan.
+     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -140,6 +161,11 @@ class ReportController extends Controller
             ->with('success', 'Rapportage aangemaakt.');
     }
 
+    /**
+     * Toont een individueel rapport met alle details.
+     * Laadt gekoppelde inspectielijst, check items en eerder verzonden PDFs.
+     * Dit is de hoofdpagina waar gebruikers checks kunnen invullen en verslepen.
+     */
     public function show(Report $report)
     {
         // Sidebar/overzicht
@@ -158,7 +184,7 @@ class ReportController extends Controller
             ?: InspectionList::with('categories.checks')->latest()->first();
 
         $submittedPdfs = collect(Storage::disk('public')->files('reports'))
-            ->filter(fn ($path) => str_starts_with($path, "reports/report-{$report->id}-"))
+            ->filter(fn($path) => str_starts_with($path, "reports/report-{$report->id}-"))
             ->sortDesc()
             ->values();
 
@@ -171,6 +197,10 @@ class ReportController extends Controller
         ]);
     }
 
+    /**
+     * Toont het bewerkingsformulier voor een bestaand rapport.
+     * Laadt beschikbare inspectielijsten voor eventuele wijziging van de koppeling.
+     */
     public function edit(Report $report)
     {
         $inspections = InspectionList::orderBy('created_at', 'desc')
@@ -179,6 +209,10 @@ class ReportController extends Controller
         return view('reports.edit', compact('report', 'inspections'));
     }
 
+    /**
+     * Werkt een bestaand rapport bij met nieuwe gegevens.
+     * Valideert de invoer en slaat wijzigingen op in de database.
+     */
     public function update(Request $request, Report $report)
     {
         $data = $request->validate([
@@ -198,6 +232,9 @@ class ReportController extends Controller
             ->with('success', 'Rapportage bijgewerkt.');
     }
 
+    /**
+     * Verwijdert een rapport permanent uit de database.
+     */
     public function destroy(Report $report)
     {
         $report->delete();
@@ -207,6 +244,11 @@ class ReportController extends Controller
             ->with('success', 'Rapportage verwijderd.');
     }
 
+    /**
+     * Slaat de tussentijdse voortgang van een rapport op.
+     * Synchroniseert check items (status, notities, foto's) zonder het rapport te finaliseren.
+     * Gebruikt de 'Opslaan' knop in de UI.
+     */
     public function saveProgress(Request $request, Report $report)
     {
         $validated = $request->validate([
@@ -228,6 +270,13 @@ class ReportController extends Controller
         return back()->with('success', 'Rapportage voortgang opgeslagen.');
     }
 
+    /**
+     * Finaliseert en verstuurt een rapport.
+     * - Valideert dat alle checks zijn ingevuld (gecontroleerd of bijzonderheden)
+     * - Slaat handtekening op als afbeelding
+     * - Genereert PDF met alle rapportgegevens
+     * - Zet status op 'submitted' en slaat verzendtijd op
+     */
     public function submit(Request $request, Report $report)
     {
         $validated = $request->validate([
@@ -274,6 +323,13 @@ class ReportController extends Controller
         $pdfPath = "reports/report-{$report->id}-" . now()->format('YmdHis') . '.pdf';
         Storage::disk('public')->put($pdfPath, $pdf->output());
 
+        try {
+            app(ReportSubmissionService::class)
+                ->sendReport($report, $pdfPath);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         if ($oldPdf && $oldPdf !== $pdfPath) {
             Storage::disk('public')->delete($oldPdf);
         }
@@ -290,6 +346,14 @@ class ReportController extends Controller
             ->with('success', 'Rapportage verzonden en PDF opgeslagen.');
     }
 
+    /**
+     * Synchroniseert check items met de database.
+     * - Controleert of alle checks compleet zijn (niet 'pending')
+     * - Slaat status, notities en foto's op per check
+     * - Verwijdert oude foto's als een check terug naar 'gecontroleerd' gaat
+     * 
+     * @return array [bool $success, string|null $errorMessage]
+     */
     private function syncCheckItems(Report $report, array $checksPayload): array
     {
         $complete = collect($checksPayload)->every(
@@ -339,6 +403,13 @@ class ReportController extends Controller
         return [true, null];
     }
 
+    /**
+     * Slaat een handtekening op als PNG bestand.
+     * Converteert een base64 data-URL naar een binair bestand en slaat op in storage/app/public/signatures.
+     * 
+     * @param string $rawSignature Base64 encoded data-URL (data:image/png;base64,...)
+     * @return string Het opgeslagen pad relatief aan de public disk
+     */
     private function storeSignature(string $rawSignature, Report $report): string
     {
         if (!Str::startsWith($rawSignature, 'data:image')) {
@@ -368,6 +439,14 @@ class ReportController extends Controller
         return $path;
     }
 
+    /**
+     * Groepeert check items per status voor PDF export.
+     * Organiseert alle checks in een gestructureerde array met:
+     * - 'gecontroleerd': alle afgevinkte checks
+     * - 'bijzonderheden': checks met notities/foto's
+     * 
+     * @return array Gegroepeerde checks per status met categorie, label, code, notities en foto's
+     */
     private function groupChecksForExport(Report $report): array
     {
         $report->loadMissing(['inspectionList.categories.checks', 'checkItems']);
