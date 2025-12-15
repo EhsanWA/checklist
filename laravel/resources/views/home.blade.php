@@ -101,7 +101,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 {{-- Handleidingen --}}
-                <a href="{{ url('#') }}"
+                <a href="{{ route('guides.index') }}"
                     class="group bg-white rounded-2xl shadow-sm border border-gray-200/70 p-6 hover:shadow-md transition">
                     <div class="flex items-start gap-4">
                         <div

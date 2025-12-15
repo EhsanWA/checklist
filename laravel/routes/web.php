@@ -6,6 +6,9 @@ use App\Http\Controllers\AdminPinController;
 use App\Http\Controllers\InspectionListController;
 
 Route::view('/', 'home')->name('home');
+Route::view('/handleidingen', 'guides.index')->name('guides.index');
+Route::view('/handleidingen/monteur', 'guides.monteur')->name('guides.monteur');
+Route::view('/handleidingen/beheerder', 'guides.beheerder')->name('guides.beheerder');
 
 // Admin PIN login/logout
 Route::get('/admin/login',  [AdminPinController::class, 'show'])->name('admin.login');
