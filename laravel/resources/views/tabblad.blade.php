@@ -441,7 +441,9 @@ function initChecklistBoard() {
     }
 
     function updateCounters() {
-        const done = form.querySelectorAll('[data-check-item][data-status="gecontroleerd"]').length;
+        const done = form.querySelectorAll(
+            '[data-check-item][data-status="gecontroleerd"], [data-check-item][data-status="bijzonderheden"]'
+        ).length;
         if (countDone) countDone.textContent = done;
     }
 
