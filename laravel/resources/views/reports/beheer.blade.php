@@ -25,13 +25,11 @@
             <div class="flex flex-col sm:flex-row gap-3">
                 <a href="{{ route('inspections.beheer') }}"
                     class="inline-flex items-center gap-2 rounded-lg bg-green-600 text-white px-4 py-2 font-medium hover:green-sky-800 shadow transition w-full sm:w-auto justify-center">
-                    <i class="fa-solid fa-plus"></i>
                     <span>Naar inspectie lijst</span>
                 </a>
 
                 <a href="{{ route('reports.create') }}"
                     class="inline-flex items-center gap-2 rounded-lg bg-sky-600 text-white px-4 py-2 font-medium hover:bg-sky-700 shadow transition w-full sm:w-auto justify-center">
-                    <i class="fa-solid fa-plus"></i>
                     <span>Rapportage aanmaken</span>
                 </a>
             </div>
@@ -39,29 +37,14 @@
 
         {{-- Tabs --}}
         @php
-            $tabs = [
-                'all' => ['label' => 'Alles', 'count' => $counts['all'] ?? 0],
-                'draft' => ['label' => 'Concepten', 'count' => $counts['draft'] ?? 0],
-                'submitted' => ['label' => 'Ingediend', 'count' => $counts['submitted'] ?? 0],
-                'archived' => ['label' => 'Archief', 'count' => $counts['archived'] ?? 0],
-            ];
-            $active = $status ?? 'all';
+        $tabs = [
+        'all' => ['label' => 'Alles', 'count' => $counts['all'] ?? 0],
+        'draft' => ['label' => 'Concepten', 'count' => $counts['draft'] ?? 0],
+        'submitted' => ['label' => 'Ingediend', 'count' => $counts['submitted'] ?? 0],
+        'archived' => ['label' => 'Archief', 'count' => $counts['archived'] ?? 0],
+        ];
+        $active = $status ?? 'all';
         @endphp
-
-        <nav class="flex flex-wrap gap-2">
-            @foreach ($tabs as $key => $tab)
-                <a href="{{ route('reports.beheer', array_merge(request()->except('page'), ['status' => $key])) }}"
-                    class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm
-                          {{ $active === $key ? 'bg-sky-600 text-white' : 'bg-white border text-gray-700 hover:bg-gray-50' }}">
-                    <span>{{ $tab['label'] }}</span>
-                    <span
-                        class="inline-flex items-center justify-center min-w-6 h-6 rounded-full text-xs
-                                 {{ $active === $key ? 'bg-white/20' : 'bg-gray-100 text-gray-700' }}">
-                        {{ $tab['count'] }}
-                    </span>
-                </a>
-            @endforeach
-        </nav>
 
         {{-- Filters --}}
         <form method="GET" action="{{ route('reports.beheer') }}" class="bg-white rounded-2xl shadow p-5">
@@ -77,9 +60,9 @@
                     <select name="status"
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-200 px-3 py-2">
                         @foreach (array_keys($tabs) as $key)
-                            <option value="{{ $key }}" {{ $status === $key ? 'selected' : '' }}>
-                                {{ $tabs[$key]['label'] }}
-                            </option>
+                        <option value="{{ $key }}" {{ $status === $key ? 'selected' : '' }}>
+                            {{ $tabs[$key]['label'] }}
+                        </option>
                         @endforeach
                     </select>
                 </div>
@@ -93,7 +76,7 @@
                         </option>
                         <option value="schip_naam_asc" {{ $sort === 'schip_naam_asc' ? 'selected' : '' }}>Schip A-Z
                         </option>
-                        <option value="schip_naam_desc"{{ $sort === 'schip_naam_desc' ? 'selected' : '' }}>Schip Z-A
+                        <option value="schip_naam_desc" {{ $sort === 'schip_naam_desc' ? 'selected' : '' }}>Schip Z-A
                         </option>
                         <option value="bouwjaar_asc" {{ $sort === 'bouwjaar_asc' ? 'selected' : '' }}>Bouwjaar ↑
                         </option>
@@ -139,58 +122,48 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
                         @forelse($reports as $report)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 font-medium">{{ $report->schip_naam ?? '—' }}</td>
-                                <td class="px-6 py-4 text-gray-700">{{ $report->schip_nummer ?? '—' }}</td>
-                                <td class="px-6 py-4 text-gray-700">{{ $report->schip_bouwjaar ?? '—' }}</td>
-                                <td class="px-6 py-4 text-gray-700">{{ $report->monteur ?? '—' }}</td>
-                                <td class="px-6 py-4">
-                                    @php
-                                        $status = $report->status ?? '';
-                                        $badge = match ($status) {
-                                            'draft' => 'bg-yellow-50 text-yellow-800 ring-yellow-600/20',
-                                            'submitted' => 'bg-sky-50 text-sky-800 ring-sky-600/20',
-                                            'archived' => 'bg-gray-100 text-gray-800 ring-gray-500/20',
-                                            default => 'bg-gray-50 text-gray-700 ring-gray-600/10',
-                                        };
-                                        $label =
-                                            [
-                                                'draft' => 'Concept',
-                                                'submitted' => 'Ingediend',
-                                                'archived' => 'Archief',
-                                            ][$status] ?? ucfirst($status ?: '—');
-                                    @endphp
-                                    <span
-                                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 {{ $badge }}">
-                                        {{ $label }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-gray-700">
-                                    {{ optional($report->created_at)->format('d-m-Y H:i') ?? '—' }}
-                                </td>
-                                <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('reports.edit', $report) }}"
-                                        class="mr-2 inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100">
-                                        Bewerken
-                                    </a>
-                                    <form action="{{ route('reports.destroy', $report) }}" method="POST"
-                                        class="inline-block"
-                                        onsubmit="return confirm('Weet je zeker dat je dit rapport wilt verwijderen?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="inline-flex items-center rounded-lg bg-red-600 text-white px-3 py-1.5 text-sm font-medium hover:bg-red-700">
-                                            Verwijderen
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 font-medium">{{ $report->schip_naam ?? '—' }}</td>
+                            <td class="px-6 py-4 text-gray-700">{{ $report->schip_nummer ?? '—' }}</td>
+                            <td class="px-6 py-4 text-gray-700">{{ $report->schip_bouwjaar ?? '—' }}</td>
+                            <td class="px-6 py-4 text-gray-700">{{ $report->monteur ?? '—' }}</td>
+                            <td class="px-6 py-4">
+                                @php
+                                $status = $report->status ?? '';
+                                $badge = match ($status) {
+                                'draft' => 'bg-yellow-50 text-yellow-800 ring-yellow-600/20',
+                                'submitted' => 'bg-sky-50 text-sky-800 ring-sky-600/20',
+                                'archived' => 'bg-gray-100 text-gray-800 ring-gray-500/20',
+                                default => 'bg-gray-50 text-gray-700 ring-gray-600/10',
+                                };
+                                $label =
+                                [
+                                'draft' => 'Concept',
+                                'submitted' => 'Ingediend',
+                                'archived' => 'Archief',
+                                ][$status] ?? ucfirst($status ?: '—');
+                                @endphp
+                                <span
+                                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 {{ $badge }}">
+                                    {{ $label }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-700">
+                                {{ optional($report->created_at)->format('d-m-Y H:i') ?? '—' }}
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="{{ route('reports.edit', $report) }}"
+                                    class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100">
+                                    Bewerken
+                                </a>
+                            </td>
+                        </tr>
                         @empty
-                            <tr>
-                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">
-                                    Geen rapportages gevonden.
-                                </td>
-                            </tr>
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                                Geen rapportages gevonden.
+                            </td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>
