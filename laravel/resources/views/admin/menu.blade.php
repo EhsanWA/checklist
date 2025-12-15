@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Beheer menu</title>
     @vite('resources/css/app.css')
-    <script src="https://kit.fontawesome.com/a2e0a4c3c1.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/21e98e6012.js" crossorigin="anonymous"></script>
 </head>
 
 <body class="bg-slate-50 text-gray-900">

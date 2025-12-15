@@ -31,66 +31,62 @@
         <section class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 max-w-5xl mx-auto">
 
             {{-- Rapportage invullen --}}
-            <article
-                class="bg-white rounded-3xl shadow-sm border border-gray-200/70 p-6 sm:p-8 hover:shadow-md transition">
-                <div class="flex items-start gap-4">
-                    <div class="shrink-0">
-                        <div
-                            class="h-12 w-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center ring-1 ring-sky-100">
-                            <i class="fa-solid fa-clipboard text-xl"></i>
+            <a href="{{ route('reports.index') }}" class="group block focus:outline-none focus:ring-2 focus:ring-sky-300 rounded-3xl">
+                <article
+                    class="bg-white rounded-3xl shadow-sm border border-gray-200/70 p-6 sm:p-8 hover:shadow-md transition">
+                    <div class="flex items-start gap-4">
+                        <div class="shrink-0">
+                            <div
+                                class="h-12 w-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center ring-1 ring-sky-100">
+                                <i class="fa-solid fa-clipboard text-xl"></i>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex-1">
-                        <h2 class="text-2xl font-semibold text-gray-900">Rapportage invullen</h2>
-                        <p class="mt-1.5 text-gray-500">
-                            Start direct met het invullen van een nieuwe rapportage of melding.
-                        </p>
+                        <div class="flex-1">
+                            <h2 class="text-2xl font-semibold text-gray-900">Rapportage invullen</h2>
+                            <p class="mt-1.5 text-gray-500">
+                                Start direct met het invullen van een nieuwe rapportage of melding.
+                            </p>
 
-                        <div class="mt-5">
-                            <a href="{{ route('reports.index') }}"
-                                class="inline-flex items-center gap-2 font-medium text-sky-700 hover:text-sky-900">
+                            <div class="mt-5 inline-flex items-center gap-2 font-medium text-sky-700 group-hover:text-sky-900">
                                 Ga naar formulier
                                 <i class="fa-solid fa-arrow-up-right-from-square text-sm"></i>
-                            </a>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </article>
+                </article>
+            </a>
 
             {{-- Beheer --}}
-            <article
-                class="bg-white rounded-3xl shadow-sm border border-gray-200/70 p-6 sm:p-8 hover:shadow-md transition">
-                <div class="flex items-start gap-4">
-                    <div class="shrink-0">
-                        <div
-                            class="h-12 w-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center ring-1 ring-amber-100">
-                            <i class="fa-solid fa-shield-halved text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="flex-1">
-                        <h2 class="text-2xl font-semibold text-gray-900">Beheerder</h2>
-                        <p class="mt-1.5 text-gray-500">
-                            Log in om rapportages te beheren (aanmaken, bewerken, verwijderen).
-                        </p>
+            @php
+            $beheerUrl = session('is_admin') === true ? route('reports.beheer') : route('admin.login');
+            $beheerLabel = session('is_admin') === true ? 'Naar beheer' : 'Naar beheer (PIN)';
+            $beheerIcon = session('is_admin') === true ? 'fa-chevron-right' : 'fa-lock';
+            @endphp
 
-                        <div class="mt-5">
-                            @if (session('is_admin') === true)
-                                <a href="{{ route('reports.beheer') }}"
-                                    class="inline-flex items-center gap-2 font-medium text-sky-700 hover:text-sky-900">
-                                    Naar beheer
-                                    <i class="fa-solid fa-chevron-right text-sm"></i>
-                                </a>
-                            @else
-                                <a href="{{ route('admin.login') }}"
-                                    class="inline-flex items-center gap-2 font-medium text-sky-700 hover:text-sky-900">
-                                    Naar beheer (PIN)
-                                    <i class="fa-solid fa-lock text-sm"></i>
-                                </a>
-                            @endif
+            <a href="{{ $beheerUrl }}" class="group block focus:outline-none focus:ring-2 focus:ring-sky-300 rounded-3xl">
+                <article
+                    class="bg-white rounded-3xl shadow-sm border border-gray-200/70 p-6 sm:p-8 hover:shadow-md transition">
+                    <div class="flex items-start gap-4">
+                        <div class="shrink-0">
+                            <div
+                                class="h-12 w-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center ring-1 ring-amber-100">
+                                <i class="fa-solid fa-shield-halved text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h2 class="text-2xl font-semibold text-gray-900">Beheerder</h2>
+                            <p class="mt-1.5 text-gray-500">
+                                Log in om rapportages te beheren (aanmaken, bewerken, verwijderen).
+                            </p>
+
+                            <div class="mt-5 inline-flex items-center gap-2 font-medium text-sky-700 group-hover:text-sky-900">
+                                {{ $beheerLabel }}
+                                <i class="fa-solid {{ $beheerIcon }} text-sm"></i>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </article>
+                </article>
+            </a>
 
         </section>
 
@@ -103,25 +99,6 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-                {{-- Documentatie --}}
-                <a href="{{ url('#') }}" {{-- vervang later door echte docs-URL of route --}}
-                    class="group bg-white rounded-2xl shadow-sm border border-gray-200/70 p-6 hover:shadow-md transition">
-                    <div class="flex items-start gap-4">
-                        <div
-                            class="h-11 w-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center ring-1 ring-indigo-100">
-                            <i class="fa-solid fa-book-open"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-700">Documentatie
-                            </h4>
-                            <p class="mt-1 text-gray-500 text-sm">Uitleg over velden, workflows en best practices.</p>
-                            <span class="mt-3 inline-flex items-center gap-1 text-indigo-700 text-sm font-medium">
-                                Open documentatie <i class="fa-solid fa-arrow-right text-xs"></i>
-                            </span>
-                        </div>
-                    </div>
-                </a>
 
                 {{-- Handleidingen --}}
                 <a href="{{ url('#') }}"
@@ -137,24 +114,6 @@
                             <p class="mt-1 text-gray-500 text-sm">Stap-voor-stap guides voor monteurs en beheerders.</p>
                             <span class="mt-3 inline-flex items-center gap-1 text-emerald-700 text-sm font-medium">
                                 Bekijk handleidingen <i class="fa-solid fa-arrow-right text-xs"></i>
-                            </span>
-                        </div>
-                    </div>
-                </a>
-
-                {{-- leeg --}}
-                <a href="{{ url('#') }}"
-                    class="group bg-white rounded-2xl shadow-sm border border-gray-200/70 p-6 hover:shadow-md transition">
-                    <div class="flex items-start gap-4">
-                        <div
-                            class="h-11 w-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center ring-1 ring-amber-100">
-                            <i class="fa-solid fa-circle-question"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-lg font-semibold text-gray-900 group-hover:text-amber-700">Extra informatie</h4>
-                            <p class="mt-1 text-gray-500 text-sm">Komt binnenkort!</p>
-                            <span class="mt-3 inline-flex items-center gap-1 text-amber-700 text-sm font-medium">
-                                Gaan! <i class="fa-solid fa-arrow-right text-xs"></i>
                             </span>
                         </div>
                     </div>
