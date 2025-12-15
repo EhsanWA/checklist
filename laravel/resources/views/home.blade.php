@@ -16,7 +16,7 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
 
-        {{-- Hero --}}
+        {{-- Landingspagina: Hero intro + twee kaarten (Rapportage invullen, Beheer). Kaarten volledig klikbaar met focus ring. --}}
         <section class="text-center">
             <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-gray-900">
                 Welkom bij de Report Manager
@@ -27,10 +27,10 @@
             </p>
         </section>
 
-        {{-- Primaire kaarten --}}
+        {{-- Hoofdkaarten: Rapportage invullen + Beheer (dynamische link/status op basis van admin sessie). --}}
         <section class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 max-w-5xl mx-auto">
 
-            {{-- Rapportage invullen --}}
+            {{-- Kaart 1: Rapportage invullen (publiek beschikbaar). --}}
             <a href="{{ route('reports.index') }}" class="group block focus:outline-none focus:ring-2 focus:ring-sky-300 rounded-3xl">
                 <article
                     class="bg-white rounded-3xl shadow-sm border border-gray-200/70 p-6 sm:p-8 hover:shadow-md transition">
@@ -56,7 +56,7 @@
                 </article>
             </a>
 
-            {{-- Beheer --}}
+            {{-- Kaart 2: Beheer (beheercode login vereist, routes dynamisch). --}}
             @php
             $beheerUrl = session('is_admin') === true ? route('reports.beheer') : route('admin.login');
             $beheerLabel = session('is_admin') === true ? 'Naar beheer' : 'Naar beheer (PIN)';
@@ -111,7 +111,7 @@
                         <div class="flex-1">
                             <h4 class="text-lg font-semibold text-gray-900 group-hover:text-emerald-700">Handleidingen
                             </h4>
-                            <p class="mt-1 text-gray-500 text-sm">Stap-voor-stap guides voor monteurs en beheerders.</p>
+                            <p class="mt-1 text-gray-500 text-sm">Stap-voor-stap handleiding voor monteurs.</p>
                             <span class="mt-3 inline-flex items-center gap-1 text-emerald-700 text-sm font-medium">
                                 Bekijk handleidingen <i class="fa-solid fa-arrow-right text-xs"></i>
                             </span>
