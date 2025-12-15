@@ -61,7 +61,7 @@
     <div class="meta">
         <p><strong>Schipnummer:</strong> {{ $report->schip_nummer ?? 'n.v.t.' }}</p>
         <p><strong>Monteur:</strong> {{ $report->monteur ?? 'Onbekend' }}</p>
-        <p><strong>Status:</strong> {{ ucfirst($report->status ?? 'concept') }}</p>
+        <p><strong>Status:</strong> {{ ucfirst($report->status ?? 'open') }}</p>
         <p><strong>Verzonden op:</strong> {{ optional($report->submitted_at)->format('d-m-Y H:i') ?? now()->format('d-m-Y H:i') }}</p>
     </div>
 

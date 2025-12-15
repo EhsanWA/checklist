@@ -66,7 +66,7 @@
                     </div>
                     <div>
                         <p class="text-xs uppercase tracking-wide text-slate-500">Status</p>
-                        <p class="text-lg font-semibold text-slate-900">{{ ucfirst($report->status ?? 'concept') }}</p>
+                        <p class="text-lg font-semibold text-slate-900">{{ ucfirst($report->status ?? 'open') }}</p>
                         <p class="text-xs text-slate-500">Bouwjaar: {{ $report->schip_bouwjaar ?? 'onbekend' }}</p>
                     </div>
                     <div>

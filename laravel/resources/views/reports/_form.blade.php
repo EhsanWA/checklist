@@ -77,7 +77,7 @@
             class="w-full rounded-lg border-gray-300 shadow-sm
                        focus:border-sky-500 focus:ring focus:ring-sky-200
                        focus:ring-opacity-50 px-4 py-2 text-gray-800">
-            <option value="draft" @selected($status === 'draft')>Concept</option>
+            <option value="draft" @selected($status === 'draft')>Open</option>
             <option value="submitted" @selected($status === 'submitted')>Ingediend</option>
             <option value="archived" @selected($status === 'archived')>Gearchiveerd</option>
         </select>

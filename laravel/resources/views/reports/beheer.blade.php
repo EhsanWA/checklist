@@ -39,7 +39,7 @@
         @php
         $tabs = [
         'all' => ['label' => 'Alles', 'count' => $counts['all'] ?? 0],
-        'draft' => ['label' => 'Concepten', 'count' => $counts['draft'] ?? 0],
+        'draft' => ['label' => 'Open', 'count' => $counts['draft'] ?? 0],
         'submitted' => ['label' => 'Ingediend', 'count' => $counts['submitted'] ?? 0],
         'archived' => ['label' => 'Archief', 'count' => $counts['archived'] ?? 0],
         ];
@@ -138,7 +138,7 @@
                                 };
                                 $label =
                                 [
-                                'draft' => 'Concept',
+                                'draft' => 'Open',
                                 'submitted' => 'Ingediend',
                                 'archived' => 'Archief',
                                 ][$status] ?? ucfirst($status ?: '—');
