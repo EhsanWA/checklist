@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // ----- BIJZONDERHEDEN LOGIC (unchanged except draggable removed) -----
+    // BIJZONDERHEDEN LOGICA
 
     function makeBijzonderheden(el) {
         if (el.classList.contains("is-bijzonderheden")) return el;
