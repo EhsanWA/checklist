@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'log'),
+    'report_recipient' => env('REPORT_RECIPIENT_EMAIL'),
 
     /*
     |--------------------------------------------------------------------------
