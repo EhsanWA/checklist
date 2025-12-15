@@ -84,16 +84,28 @@
                         <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
                     @enderror
 
-                    <div class="mt-4 space-y-2">
-                        <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            Foto's toevoegen
-                        </label>
-                        <input type="file" name="checks[{{ $check->id }}][photos][]" multiple accept="image/*"
-                            capture="environment" data-photo-field
-                            class="block w-full rounded-lg border border-dashed border-slate-300 px-3 py-10 text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-sky-100 file:px-3 file:py-2 file:text-sky-700 hover:border-sky-300">
-                        @error('checks.' . $check->id . '.photos.*')
-                            <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
-                        @enderror
+                    <div class="mt-4 space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Foto's toevoegen
+                            </label>
+                            <input type="file" name="checks[{{ $check->id }}][photos][]" multiple accept="image/*"
+                                data-photo-field
+                                class="block w-full rounded-lg border border-dashed border-slate-300 px-3 py-10 text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-sky-100 file:px-3 file:py-2 file:text-sky-700 hover:border-sky-300">
+                            @error('checks.' . $check->id . '.photos.*')
+                                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Foto maken met camera
+                            </label>
+                            <input type="file" name="checks[{{ $check->id }}][photos][]" accept="image/*;capture=camera"
+                                capture="environment"
+                                class="block w-full rounded-lg border border-dashed border-slate-300 px-3 py-6 text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-sky-100 file:px-3 file:py-2 file:text-sky-700 hover:border-sky-300">
+                            <p class="text-xs text-slate-400">Op mobiel opent dit de camera; op desktop zie je de bestandskiezer.</p>
+                        </div>
 
                         @if (!empty($existingPhotos))
                             <div class="flex flex-wrap gap-3 text-xs">
