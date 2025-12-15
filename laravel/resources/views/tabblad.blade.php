@@ -218,7 +218,7 @@
         </div>
     </form>
 
-    <!-- Sticky actiebar onderin - OUTSIDE the form -->
+    <!-- Sticky actiebar onderin - buiten de form -->
     <div id="sticky-actions"
         class="fixed left-0 right-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
         <div class="mx-auto flex max-w-5xl items-center gap-3">
@@ -241,6 +241,7 @@
     </div>
 
     <script>
+        // Tabblad navigatie: Schakelt tussen 3 tabs. Initialiseert checklist board met drop zones.
         function toggleSidebar() {
             const sidebar = document.getElementById("sidebar");
             sidebar.classList.toggle("translate-x-full");
@@ -265,13 +266,14 @@
         // Default tab
         switchTab(2);
 
-        // Initialize Checklist Board
+        // CHECKLIST BOARD: Beheert check item states (pending/gecontroleerd/bijzonderheden), valideert completeness, stuurt PDF bij afronden.
         initChecklistBoard();
 
         function initChecklistBoard() {
             const form = document.getElementById("report-progress-form");
             if (!form) return;
 
+            // ZONE MAPPING: Verzamelt status zones (pending/gecontroleerd/bijzonderheden) voor item plaatsing via buttons.
             const dropzones = form.querySelectorAll("[data-dropzone]");
             const zoneMap = {};
             let pendingHasItems = true;
@@ -297,7 +299,7 @@
             let signatureDirty = false;
             let currentSearchTerm = "";
 
-            // Initialize dropzones (but no drag events anymore)
+            // Kaartzones op basis van statuscode voor itemplaatsing
             dropzones.forEach(zone => {
                 zoneMap[zone.dataset.dropzone] = zone;
             });
@@ -305,12 +307,8 @@
             const items = form.querySelectorAll("[data-check-item]");
             if (countTotal) countTotal.textContent = items.length;
 
-            // Initialize items
+            // Zorg voor consistente ID's (deze worden bewaard omdat de fotovoorbeeldfunctie ze wordt gebruikt).
             items.forEach(item => {
-                // Ensure drag is disabled
-                item.removeAttribute("draggable");
-                item.draggable = false;
-
                 // Status buttons
                 item.querySelectorAll("[data-status-option]").forEach(btn => {
                     btn.addEventListener("click", () => {
@@ -323,18 +321,7 @@
                     });
                 });
 
-                // Cycle button (optional)
-                const cycleBtn = item.querySelector("[data-cycle-status]");
-                if (cycleBtn) {
-                    cycleBtn.addEventListener("click", () => {
-                        const order = ["pending", "gecontroleerd", "bijzonderheden"];
-                        const cur = item.dataset.status || "pending";
-                        const next = order[(order.indexOf(cur) + 1) % order.length];
-                        moveItem(item, next);
-                    });
-                }
-
-                // Move to initial zone
+                // verplaats naar initiele zone
                 moveItem(item, item.dataset.status || "pending");
             });
 
@@ -342,7 +329,7 @@
             updateCounters();
             updateActionButtons();
 
-            // SEARCH
+            // zoek
             function initSearch() {
                 if (!items.length || !searchInput) return;
 
@@ -439,7 +426,7 @@
                 openActionBtn?.classList.toggle("hidden", pendingHasItems);
             }
 
-            // SIGNATURE PAD
+            // Handtekening veld
             initSignaturePad();
 
             function initSignaturePad() {
@@ -520,7 +507,7 @@
                 });
             }
 
-            // PDF MENU
+            // PDF menu
             initPdfDropdown();
 
             function initPdfDropdown() {

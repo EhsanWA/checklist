@@ -1,11 +1,12 @@
 import "./bootstrap";
 
+// Handleiding foto's, drag/drop, en drag-disable toggle (via form data-enable-drag attribute).
 document.addEventListener("DOMContentLoaded", function () {
     function getTabContent(index) {
         return document.getElementById(`tab${index}-content`);
     }
 
-    // ensure consistent IDs (kept because photo preview logic uses it)
+    // Zorg voor consistente ID's
     function ensureId(el) {
         if (!el.id) {
             el.id = `report-${Date.now()}-${Math.random()
@@ -14,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // ----- BIJZONDERHEDEN LOGIC (unchanged except draggable removed) -----
+    // Bijzonderheden logica: Activeer notes + foto inputs voor status=bijzonderheden via moveItem().
 
     function makeBijzonderheden(el) {
         if (el.classList.contains("is-bijzonderheden")) return el;
@@ -53,26 +54,61 @@ document.addEventListener("DOMContentLoaded", function () {
                 fileInput.className = "report-photo-input";
                 fileInput.style.display = "none";
 
+                // Foto upload met 2MB client-side limiet + Canvas resize/compress (1200×900, JPEG 85%).
                 fileInput.addEventListener("change", function () {
                     const file = this.files?.[0];
                     if (!file) return;
 
                     const MAX = 2 * 1024 * 1024;
                     if (file.size > MAX) {
-                        alert("De geselecteerde foto is te groot. Maximaal 2MB.");
+                        alert(
+                            "De geselecteerde foto is te groot. Maximaal 2MB."
+                        );
                         this.value = "";
                         return;
                     }
 
                     const reader = new FileReader();
                     reader.onload = function (e) {
+                        // Canvas resize: max 1200×900, export JPEG 85% kwaliteit.
+                        const canvas = document.createElement("canvas");
+                        const img = new Image();
+                        img.onload = function () {
+                            const maxW = 1200,
+                                maxH = 900;
+                            let w = img.width,
+                                h = img.height;
+                            if (w > h) {
+                                if (w > maxW) {
+                                    h = h * (maxW / w);
+                                    w = maxW;
+                                }
+                            } else {
+                                if (h > maxH) {
+                                    w = w * (maxH / h);
+                                    h = maxH;
+                                }
+                            }
+                            canvas.width = w;
+                            canvas.height = h;
+                            canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+                            canvas.toBlob(
+                                (blob) => {
+                                    fileInput._resizedBlob = blob;
+                                },
+                                "image/jpeg",
+                                0.85
+                            );
+                        };
+                        img.src = e.target.result;
+
                         const wrap = document.createElement("div");
                         wrap.className = "photo-preview mt-2 relative";
 
-                        const img = document.createElement("img");
-                        img.src = e.target.result;
-                        img.className = "rounded shadow-md";
-                        img.style.maxWidth = "200px";
+                        const preview = document.createElement("img");
+                        preview.src = e.target.result;
+                        preview.className = "rounded shadow-md";
+                        preview.style.maxWidth = "200px";
 
                         const removeBtn = document.createElement("button");
                         removeBtn.type = "button";
@@ -85,7 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             fileInput.value = "";
                         });
 
-                        wrap.appendChild(img);
+                        wrap.appendChild(preview);
                         wrap.appendChild(removeBtn);
                         el.appendChild(wrap);
                     };
@@ -136,10 +172,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         el.appendChild(btn);
         el.appendChild(textarea);
-
         return el;
     }
 
+    // Drag & drop verwijderen voor bijzonderheden
     function removeBijzonderheden(el) {
         if (!el.classList.contains("is-bijzonderheden")) return el;
 
