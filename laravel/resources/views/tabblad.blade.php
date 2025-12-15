@@ -25,15 +25,15 @@
         @csrf
 
         @if (session('success'))
-        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800">
-            {{ session('success') }}
-        </div>
+            <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800">
+                {{ session('success') }}
+            </div>
         @endif
 
         @if ($errors->has('progress'))
-        <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700">
-            {{ $errors->first('progress') }}
-        </div>
+            <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700">
+                {{ $errors->first('progress') }}
+            </div>
         @endif
 
         {{-- Tab 1: Gecontroleerd --}}
@@ -66,7 +66,7 @@
                     </div>
                     <div>
                         <p class="text-xs uppercase tracking-wide text-slate-500">Status</p>
-                        <p class="text-lg font-semibold text-slate-900">{{ ucfirst($report->status ?? 'concept') }}</p>
+                        <p class="text-lg font-semibold text-slate-900">{{ ucfirst($report->status ?? 'open') }}</p>
                         <p class="text-xs text-slate-500">Bouwjaar: {{ $report->schip_bouwjaar ?? 'onbekend' }}</p>
                     </div>
                     <div>
@@ -90,38 +90,38 @@
                     </div>
 
                     @if ($report->inspectionList)
-                    <div class="flex items-center gap-2" data-pdf-menu>
-                        <div class="relative">
-                            <button type="button"
-                                class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:border-sky-400 hover:text-sky-600"
-                                data-pdf-toggle>
-                                Verzonden PDF's
-                                <i class="fa-solid fa-chevron-down text-xs"></i>
-                            </button>
-                            <div class="pdf-dropdown hidden absolute right-0 top-full mt-2 w-64 rounded-2xl border border-slate-200 bg-white shadow-xl z-10"
-                                data-pdf-dropdown>
-                                <div class="border-b border-slate-100 px-4 py-2">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                        Verzonden PDF's</p>
+                        <div class="flex items-center gap-2" data-pdf-menu>
+                            <div class="relative">
+                                <button type="button"
+                                    class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:border-sky-400 hover:text-sky-600"
+                                    data-pdf-toggle>
+                                    Verzonden PDF's
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </button>
+                                <div class="pdf-dropdown hidden absolute right-0 top-full mt-2 w-64 rounded-2xl border border-slate-200 bg-white shadow-xl z-10"
+                                    data-pdf-dropdown>
+                                    <div class="border-b border-slate-100 px-4 py-2">
+                                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                            Verzonden PDF's</p>
+                                    </div>
+                                    @if (($submittedPdfs ?? collect())->isEmpty())
+                                        <p class="px-4 py-3 text-sm text-slate-500">Nog geen verzonden bestanden.</p>
+                                    @else
+                                        <ul class="max-h-60 overflow-y-auto">
+                                            @foreach ($submittedPdfs as $pdf)
+                                                <li>
+                                                    <a href="{{ Storage::url($pdf) }}" target="_blank"
+                                                        class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                                        <i class="fa-solid fa-file-pdf text-sky-500"></i>
+                                                        <span class="truncate">{{ basename($pdf) }}</span>
+                                                    </a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
                                 </div>
-                                @if (($submittedPdfs ?? collect())->isEmpty())
-                                <p class="px-4 py-3 text-sm text-slate-500">Nog geen verzonden bestanden.</p>
-                                @else
-                                <ul class="max-h-60 overflow-y-auto">
-                                    @foreach ($submittedPdfs as $pdf)
-                                    <li>
-                                        <a href="{{ Storage::url($pdf) }}" target="_blank"
-                                            class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                                            <i class="fa-solid fa-file-pdf text-sky-500"></i>
-                                            <span class="truncate">{{ basename($pdf) }}</span>
-                                        </a>
-                                    </li>
-                                    @endforeach
-                                </ul>
-                                @endif
                             </div>
                         </div>
-                    </div>
                     @endif
                 </div>
 
@@ -141,19 +141,19 @@
 
                 {{-- Checklist --}}
                 @if ($report->inspectionList)
-                <div id="checks-container"
-                    class="mt-4 checklist-dropzone min-h-[320px] rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/60 p-4 space-y-4 transition"
-                    data-dropzone="pending">
-                    <p class="text-sm text-slate-400" data-empty-state>Alle checks zijn verwerkt.</p>
-                    @include('reportCard', [
-                    'report' => $report,
-                    'checkItems' => $checkItems ?? collect(),
-                    ])
-                </div>
+                    <div id="checks-container"
+                        class="mt-4 checklist-dropzone min-h-[320px] rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/60 p-4 space-y-4 transition"
+                        data-dropzone="pending">
+                        <p class="text-sm text-slate-400" data-empty-state>Alle checks zijn verwerkt.</p>
+                        @include('reportCard', [
+                            'report' => $report,
+                            'checkItems' => $checkItems ?? collect(),
+                        ])
+                    </div>
                 @else
-                <div class="mt-4 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-yellow-900">
-                    Geen inspectielijst gekoppeld aan deze rapportage.
-                </div>
+                    <div class="mt-4 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-yellow-900">
+                        Geen inspectielijst gekoppeld aan deze rapportage.
+                    </div>
                 @endif
             </div>
         </div>
@@ -179,7 +179,8 @@
                         <h2 class="text-xl font-semibold text-slate-900">Rapportage afronden</h2>
                         <p class="text-sm text-slate-500">Teken en verstuur de rapportage.</p>
                         <p data-open-warning class="mt-2 text-sm font-medium text-amber-600">
-                            Tik alle controles aan om ze te markeren als Gecontroleerd of Bijzonderheden voordat je verstuurt.
+                            Tik alle controles aan om ze te markeren als Gecontroleerd of Bijzonderheden voordat je
+                            verstuurt.
                         </p>
                     </div>
                     <button type="button" id="close-action-modal"
@@ -407,12 +408,15 @@
             }
 
             function updateCounters() {
-                const done = form.querySelectorAll('[data-check-item][data-status="gecontroleerd"]').length;
+                const done = form.querySelectorAll(
+                    '[data-check-item][data-status="gecontroleerd"], [data-check-item][data-status="bijzonderheden"]'
+                ).length;
                 if (countDone) countDone.textContent = done;
             }
 
             function updateActionButtons() {
-                const disabledSave = pendingHasItems;
+                // Opslaan moet altijd kunnen; verzenden alleen zonder openstaande items en met handtekening.
+                const disabledSave = false;
                 const disabledSend = pendingHasItems || !signatureDirty;
 
                 if (saveBtn) saveBtn.disabled = disabledSave;

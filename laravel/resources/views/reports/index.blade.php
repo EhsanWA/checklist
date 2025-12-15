@@ -59,7 +59,7 @@
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-200 px-3 py-2">
                         @php $s = request('status', ''); @endphp
                         <option value="" {{ $s === '' ? 'selected' : '' }}>Alles</option>
-                        <option value="draft" {{ $s === 'draft' ? 'selected' : '' }}>Concept</option>
+                        <option value="draft" {{ $s === 'draft' ? 'selected' : '' }}>Open</option>
                         <option value="submitted" {{ $s === 'submitted' ? 'selected' : '' }}>Ingediend</option>
                         <option value="archived" {{ $s === 'archived' ? 'selected' : '' }}>Archief</option>
                     </select>
@@ -143,7 +143,7 @@
                                 };
                                 $label =
                                 [
-                                'draft' => 'Concept',
+                                'draft' => 'Open',
                                 'submitted' => 'Ingediend',
                                 'archived' => 'Archief',
                                 ][$status] ?? ucfirst($status ?: '—');

@@ -78,7 +78,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
                 <select name="status"
                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring focus:ring-sky-200 px-4 py-2 text-gray-800">
-                    <option value="draft" {{ old('status') === 'draft' ? 'selected' : '' }}>Concept</option>
+                    <option value="draft" {{ old('status') === 'draft' ? 'selected' : '' }}>Open</option>
                     <option value="submitted" {{ old('status') === 'submitted' ? 'selected' : '' }}>Ingediend</option>
                     <option value="archived" {{ old('status') === 'archived' ? 'selected' : '' }}>Gearchiveerd</option>
                 </select>
@@ -125,4 +125,3 @@
 </body>
 
 </html>
-

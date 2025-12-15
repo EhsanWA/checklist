@@ -38,7 +38,7 @@
                     <i class="fa-solid fa-table-list"></i>
                 </div>
                 <h2 class="text-xl font-semibold">Rapportage beheer</h2>
-                <p class="text-gray-600 mt-2">Beheer concepten, verzonden rapportages en archief.</p>
+                <p class="text-gray-600 mt-2">Beheer open rapportages, verzonden rapportages en archief.</p>
                 <span class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-sky-700 group-hover:gap-3 transition">
                     Openen <i class="fa-solid fa-arrow-right"></i>
                 </span>

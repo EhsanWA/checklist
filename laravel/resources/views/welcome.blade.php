@@ -23,9 +23,9 @@
             <h2 class="text-2xl font-bold mb-2">Welkom</h2>
             <p class="text-gray-600 mb-8">Kies hieronder welke rapportage je wilt openen.</p>
 
-            {{-- Concepten --}}
+            {{-- Open rapportages --}}
             <div class="mb-10 text-left">
-                <h3 class="text-xl font-semibold text-sky-600 mb-4">Concepten</h3>
+                <h3 class="text-xl font-semibold text-sky-600 mb-4">Open</h3>
                 @if ($drafts->count())
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                     @foreach ($drafts as $report)
@@ -40,6 +40,7 @@
                 </div>
                 @else
                 <p class="text-gray-500">Geen concepten beschikbaar.</p>
+                    <p class="text-gray-500">Geen open rapportages beschikbaar.</p>
                 @endif
             </div>
 
