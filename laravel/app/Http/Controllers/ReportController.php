@@ -259,7 +259,8 @@ class ReportController extends Controller
             'checks.*.photos.*' => ['nullable', 'image', 'max:5120'],
         ]);
 
-        [$ok, $message] = $this->syncCheckItems($report, $validated['checks']);
+        // Opslaan van voortgang mag ook met openstaande (pending) checks.
+        [$ok, $message] = $this->syncCheckItems($report, $validated['checks'], requireCompletion: false);
 
         if (!$ok) {
             return back()
@@ -348,20 +349,22 @@ class ReportController extends Controller
 
     /**
      * Synchroniseert check items met de database.
-     * - Controleert of alle checks compleet zijn (niet 'pending')
+     * - Kan optioneel afdwingen dat alle checks afgerond zijn (geen 'pending')
      * - Slaat status, notities en foto's op per check
      * - Verwijdert oude foto's als een check terug naar 'gecontroleerd' gaat
      * 
      * @return array [bool $success, string|null $errorMessage]
      */
-    private function syncCheckItems(Report $report, array $checksPayload): array
+    private function syncCheckItems(Report $report, array $checksPayload, bool $requireCompletion = true): array
     {
-        $complete = collect($checksPayload)->every(
-            fn($check) => in_array($check['status'], ['gecontroleerd', 'bijzonderheden'], true)
-        );
+        if ($requireCompletion) {
+            $complete = collect($checksPayload)->every(
+                fn($check) => in_array($check['status'], ['gecontroleerd', 'bijzonderheden'], true)
+            );
 
-        if (!$complete) {
-            return [false, 'Niet alle controles zijn toegewezen aan Gecontroleerd of Bijzonderheden.'];
+            if (!$complete) {
+                return [false, 'Niet alle controles zijn toegewezen aan Gecontroleerd of Bijzonderheden.'];
+            }
         }
 
         foreach ($checksPayload as $checkId => $payload) {

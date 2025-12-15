@@ -448,7 +448,8 @@ function initChecklistBoard() {
     }
 
     function updateActionButtons() {
-        const disabledSave = pendingHasItems;
+        // Opslaan moet altijd kunnen; verzenden alleen zonder openstaande items en met handtekening.
+        const disabledSave = false;
         const disabledSend = pendingHasItems || !signatureDirty;
 
         if (saveBtn) saveBtn.disabled = disabledSave;
