@@ -299,6 +299,30 @@
             let signatureDirty = false;
             let currentSearchTerm = "";
 
+            // Modal controls
+            if (openActionBtn && actionModal) {
+                openActionBtn.addEventListener("click", () => {
+                    actionModal.classList.remove("hidden");
+                    document.body.classList.add("overflow-hidden");
+                });
+            }
+
+            if (closeActionBtn && actionModal) {
+                closeActionBtn.addEventListener("click", () => {
+                    actionModal.classList.add("hidden");
+                    document.body.classList.remove("overflow-hidden");
+                });
+            }
+
+            if (actionModal) {
+                actionModal.addEventListener("click", event => {
+                    if (event.target === actionModal) {
+                        actionModal.classList.add("hidden");
+                        document.body.classList.remove("overflow-hidden");
+                    }
+                });
+            }
+
             // Kaartzones op basis van statuscode voor itemplaatsing
             dropzones.forEach(zone => {
                 zoneMap[zone.dataset.dropzone] = zone;
