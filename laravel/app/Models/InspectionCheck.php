@@ -11,7 +11,7 @@ class InspectionCheck extends Model
 
     public function category()
     {
-        return $this->belongsTo(InspectionCategory::class);
+        return $this->belongsTo(InspectionCategory::class, 'inspection_category_id');
     }
 
     public function reportItems()
