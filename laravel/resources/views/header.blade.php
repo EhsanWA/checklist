@@ -47,11 +47,5 @@
             </button>
         </form>
         @endif
-
-        {{-- Hamburger voor small screens (jouw eigen drawer/side menu) --}}
-        <button type="button" onclick="toggleSidebar()"
-            class="sm:hidden inline-flex items-center justify-center px-3 py-2">
-            <i class="fa-solid fa-bars text-2xl" style="color:#ffffff;"></i>
-        </button>
     </div>
 </header>
