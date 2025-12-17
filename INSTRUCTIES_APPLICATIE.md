@@ -371,6 +371,352 @@ data-note-wrapper
 
 ---
 
+## Email Configuratie
+
+### Overzicht
+
+Laravel ondersteunt meerdere mail drivers (SMTP, Mailgun, SendGrid, etc.). Je kunt eenvoudig switchen tussen providers of aangepaste afzenders instellen.
+
+### Mail Drivers Configureren
+
+📁 `.env` file (root van project):
+
+```env
+# SMTP Server (standaard)
+MAIL_DRIVER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=587
+MAIL_USERNAME=your_username
+MAIL_PASSWORD=your_password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@example.com
+MAIL_FROM_NAME="Report Manager"
+```
+
+**Beschikbare drivers:**
+
+| Driver     | Configuratie                        | Voordeel                          |
+| ---------- | ----------------------------------- | --------------------------------- |
+| `smtp`     | SMTP server (Mailtrap, Gmail, etc.) | Meest flexibel                    |
+| `mailgun`  | Mailgun API                         | Betrouwbaar, goede deliverability |
+| `sendgrid` | SendGrid API                        | Groot volume, goede statistieken  |
+| `ses`      | AWS SES                             | Goedkoop voor hoog volume         |
+| `log`      | Log bestanden                       | Development/testing               |
+
+### Gmail SMTP Instellen
+
+📁 `.env`:
+
+```env
+MAIL_DRIVER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your_app_password  # Google App Password (niet je gewone wachtwoord!)
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=your-email@gmail.com
+MAIL_FROM_NAME="Report Manager"
+```
+
+**⚠️ Belangrijk:** Gebruik een **Google App Password**, niet je normale Gmail wachtwoord:
+
+1. Ga naar [myaccount.google.com/security](https://myaccount.google.com/security)
+2. Zorg dat 2FA is ingeschakeld
+3. Zoek "App passwords"
+4. Selecteer "Mail" en "Windows Computer"
+5. Kopieer gegenereerd wachtwoord in `MAIL_PASSWORD`
+
+### Mailgun Instellen
+
+📁 `.env`:
+
+```env
+MAIL_DRIVER=mailgun
+MAILGUN_DOMAIN=sandboxXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.mailgun.org
+MAILGUN_SECRET=key-XXXXXXXXXXXXXXXXXXXX
+MAIL_FROM_ADDRESS=noreply@sandboxXXX.mailgun.org
+MAIL_FROM_NAME="Report Manager"
+```
+
+Haal deze waarden op van je Mailgun dashboard.
+
+### Mailable Class Aanmaken
+
+Maak een Laravel Mailable voor rapportage-emails:
+
+```bash
+php artisan make:mail ReportSubmittedMail
+```
+
+📁 `app/Mail/ReportSubmittedMail.php`:
+
+```php
+<?php
+
+namespace App\Mail;
+
+use App\Models\Report;
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
+
+class ReportSubmittedMail extends Mailable
+{
+    use Queueable, SerializesModels;
+
+    public function __construct(public Report $report)
+    {
+    }
+
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: "Rapportage ingediend: {$this->report->schip_naam}",
+            from: 'noreply@example.com',  // ← Override afzender per email
+            replyTo: 'support@example.com',
+        );
+    }
+
+    public function content(): Content
+    {
+        return new Content(
+            view: 'emails.report-submitted',
+            with: [
+                'report' => $this->report,
+                'reportUrl' => route('reports.show', $this->report),
+            ]
+        );
+    }
+
+    public function attachments(): array
+    {
+        return [
+            // Voeg PDF bijlage toe
+            // 'storage/app/public/reports/report-123.pdf',
+        ];
+    }
+}
+```
+
+### Email Template Aanmaken
+
+📁 `resources/views/emails/report-submitted.blade.php`:
+
+```blade
+<h2>Rapportage Ingediend</h2>
+
+<p>Hallo,</p>
+
+<p>De rapportage "<strong>{{ $report->schip_naam }}</strong>" is succesvol ingediend.</p>
+
+<table>
+    <tr>
+        <td><strong>Monteur:</strong></td>
+        <td>{{ $report->monteur }}</td>
+    </tr>
+    <tr>
+        <td><strong>Schipnummer:</strong></td>
+        <td>{{ $report->schip_nummer }}</td>
+    </tr>
+    <tr>
+        <td><strong>Datum:</strong></td>
+        <td>{{ $report->created_at->format('d-m-Y H:i') }}</td>
+    </tr>
+</table>
+
+<p>
+    <a href="{{ $reportUrl }}">Bekijk rapportage</a>
+</p>
+
+<p>Met vriendelijke groet,<br>Report Manager Team</p>
+```
+
+### Email Versturen vanuit Controller
+
+📁 `app/Http/Controllers/ReportController.php`:
+
+```php
+use App\Mail\ReportSubmittedMail;
+use Illuminate\Support\Facades\Mail;
+
+public function submit(Report $report)
+{
+    // ... validatie & PDF generatie code ...
+
+    // Email versturen
+    Mail::send(new ReportSubmittedMail($report));
+
+    // Of naar specifiek adres:
+    Mail::to('manager@example.com')
+        ->send(new ReportSubmittedMail($report));
+
+    // Of naar meerdere adressen:
+    Mail::to(['user@example.com', 'manager@example.com'])
+        ->send(new ReportSubmittedMail($report));
+
+    return redirect()->route('reports.show', $report)
+        ->with('success', 'Rapportage ingediend en email verzonden.');
+}
+```
+
+### Meerdere Mail Afzenders (per situatie)
+
+📁 `app/Mail/ReportSubmittedMail.php`:
+
+```php
+public function envelope(): Envelope
+{
+    // Dynamisch afzenderadres kiezen
+    $fromAddress = config('mail.from.address');
+    $fromName = config('mail.from.name');
+
+    // Of per rapportage type:
+    if ($this->report->status === 'urgent') {
+        $fromAddress = 'urgent@example.com';
+        $fromName = 'Urgent Reports';
+    }
+
+    return new Envelope(
+        subject: "Rapportage: {$this->report->schip_naam}",
+        from: $fromAddress,
+    );
+}
+```
+
+### Mailers (Laravel 9+)
+
+In plaats van enkel drivers, kun je ook meerdere **mailers** definiëren:
+
+📁 `config/mail.php`:
+
+```php
+'mailers' => [
+    'smtp' => [
+        'transport' => 'smtp',
+        'host' => env('MAIL_HOST'),
+        'port' => env('MAIL_PORT'),
+        'encryption' => env('MAIL_ENCRYPTION'),
+        'username' => env('MAIL_USERNAME'),
+        'password' => env('MAIL_PASSWORD'),
+    ],
+
+    'gmail' => [
+        'transport' => 'smtp',
+        'host' => 'smtp.gmail.com',
+        'port' => 587,
+        'encryption' => 'tls',
+        'username' => env('GMAIL_USERNAME'),
+        'password' => env('GMAIL_PASSWORD'),
+    ],
+
+    'mailgun' => [
+        'transport' => 'mailgun',
+    ],
+],
+
+'from' => [
+    'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
+    'name' => env('MAIL_FROM_NAME', 'Example'),
+],
+```
+
+📁 `.env`:
+
+```env
+# Standaard SMTP
+MAIL_DRIVER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_USERNAME=...
+MAIL_PASSWORD=...
+
+# Gmail credentials
+GMAIL_USERNAME=your-email@gmail.com
+GMAIL_PASSWORD=app_password_here
+```
+
+**In controller:**
+
+```php
+// Stuur via standaard mailer
+Mail::send(new ReportSubmittedMail($report));
+
+// Of via specifieke mailer
+Mail::mailer('gmail')
+    ->to('user@example.com')
+    ->send(new ReportSubmittedMail($report));
+
+// Of via Mailgun
+Mail::mailer('mailgun')
+    ->to('manager@example.com')
+    ->send(new ReportSubmittedMail($report));
+```
+
+### Queue (Asynchrone Verzending)
+
+Voor betere performance, verzend emails via queue:
+
+📁 `.env`:
+
+```env
+QUEUE_CONNECTION=database  # of 'redis', 'beanstalkd'
+```
+
+📁 `app/Http/Controllers/ReportController.php`:
+
+```php
+// Voeg 'queue' toe - email wordt async verzonden
+Mail::to('user@example.com')
+    ->queue(new ReportSubmittedMail($report));
+```
+
+Start queue worker:
+
+```bash
+php artisan queue:work
+```
+
+### Testen van Emails (Development)
+
+📁 `.env`:
+
+```env
+MAIL_DRIVER=log  # Emails worden naar storage/logs geschreven
+```
+
+Of gebruik **Mailtrap** (gratis sandbox SMTP):
+
+1. Registreer op [mailtrap.io](https://mailtrap.io)
+2. Kopieer SMTP credentials naar `.env`
+3. Alle emails worden in webinterface getoond
+
+### Email Bestanden Opklappen
+
+📁 `.env` instellingen:
+
+```env
+# Welke velden gebruiken
+MAIL_FROM_ADDRESS=noreply@example.com
+MAIL_FROM_NAME="Report Manager"
+
+# Welke driver
+MAIL_DRIVER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=587
+MAIL_USERNAME=your_username
+MAIL_PASSWORD=your_password
+MAIL_ENCRYPTION=tls
+```
+
+📁 `config/mail.php` (main config) – hierin staan alle opties
+
+📁 `app/Mail/*.php` – Email templates (Mailable classes)
+
+📁 `resources/views/emails/` – Email HTML views
+
+---
+
 ## Veelvoorkomende Aanpassingen
 
 ### 1. **PIN-code Beheerder Wijzigen**
